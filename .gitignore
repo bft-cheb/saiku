@@ -8,3 +8,5 @@ target
 /out/
 build
 classes
+.idea
+gradle
