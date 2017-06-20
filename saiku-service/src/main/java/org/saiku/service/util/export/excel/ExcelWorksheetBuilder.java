@@ -88,7 +88,7 @@ public class ExcelWorksheetBuilder {
   protected void init( String saikuQueryName, CellDataSet table, List<SaikuDimensionSelection> filters, ExcelBuilderOptions options, int show_sums ) {
     this.show_sums = show_sums;
     this.options = options;
-    this.saikuQueryName = saikuQueryName;
+    this.saikuQueryName = StringUtils.substringBefore(saikuQueryName, "_id.");
     queryFilters = filters;
     maxRows = SpreadsheetVersion.EXCEL2007.getMaxRows();
     maxColumns = SpreadsheetVersion.EXCEL2007.getMaxColumns();
@@ -456,7 +456,7 @@ public class ExcelWorksheetBuilder {
   private double getItogoForFirstcolumn(AbstractBaseCell[][] body, int measureColumn) {
     double sum = 0;
     int rowMoveIndex = 0;
-    while (rowMoveIndex < body.length-2) {
+    while (rowMoveIndex < body.length-1) {
       Number numberValue = ((DataCell) rowsetBody[rowMoveIndex][measureColumn]).getRawNumber();
       sum += numberValue == null ? 0 : numberValue.doubleValue();
       rowMoveIndex++;
