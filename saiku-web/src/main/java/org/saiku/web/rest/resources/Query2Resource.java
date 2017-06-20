@@ -15,29 +15,46 @@
  */
 package org.saiku.web.rest.resources;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.qmino.miredot.annotations.ReturnType;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.saiku.olap.dto.SimpleCubeElement;
 import org.saiku.olap.dto.resultset.CellDataSet;
 import org.saiku.olap.query2.ThinQuery;
 import org.saiku.olap.util.SaikuProperties;
 import org.saiku.service.olap.ThinQueryService;
+import org.saiku.service.olap.drillthrough.DrillThroughResult;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.saiku.web.export.JSConverter;
 import org.saiku.web.export.PdfReport;
 import org.saiku.web.rest.objects.resultset.QueryResult;
 import org.saiku.web.rest.util.RestUtil;
-
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.qmino.miredot.annotations.ReturnType;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.ServletException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,15 +63,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 
 /**
  * Saiku Query Endpoints
@@ -457,6 +465,7 @@ public class Query2Resource {
             Long start = (new Date()).getTime();
             if (position == null) {
                 rs = thinQueryService.drillthrough(queryName, maxrows, returns);
+                rsc = RestUtil.convert(rs);
             } else {
                 String[] positions = position.split(":");
                 List<Integer> cellPosition = new ArrayList<>();
@@ -465,10 +474,9 @@ public class Query2Resource {
                     Integer pInt = Integer.parseInt(p);
                     cellPosition.add(pInt);
                 }
-
-                rs = thinQueryService.drillthrough(queryName, cellPosition, maxrows, returns);
+                DrillThroughResult drillthrough = thinQueryService.drillthroughWithCaptions(queryName, cellPosition, maxrows, returns);
+                rsc = RestUtil.convert(drillthrough);
             }
-            rsc = RestUtil.convert(rs);
             Long runtime = (new Date()).getTime()- start;
             rsc.setRuntime(runtime.intValue());
 

@@ -15,44 +15,8 @@
  */
 package org.saiku.service.olap;
 
+import mondrian.olap4j.SaikuMondrianHelper;
 import org.apache.commons.lang.StringUtils;
-
-import org.saiku.olap.dto.SaikuCube;
-import org.saiku.olap.dto.SimpleCubeElement;
-import org.saiku.olap.dto.resultset.CellDataSet;
-import org.saiku.olap.query.IQuery;
-import org.saiku.olap.query.IQuery.QueryType;
-import org.saiku.olap.query.OlapQuery;
-import org.saiku.olap.query.QueryDeserializer;
-import org.saiku.olap.query2.*;
-import org.saiku.olap.query2.ThinQueryModel.AxisLocation;
-import org.saiku.olap.query2.util.Fat;
-import org.saiku.olap.query2.util.Thin;
-import org.saiku.olap.util.ObjectUtil;
-import org.saiku.olap.util.OlapResultSetUtil;
-import org.saiku.olap.util.QueryConverter;
-import org.saiku.olap.util.SaikuProperties;
-import org.saiku.olap.util.SaikuUniqueNameComparator;
-import org.saiku.olap.util.formatter.CellSetFormatterFactory;
-import org.saiku.olap.util.formatter.FlattenedCellSetFormatter;
-import org.saiku.olap.util.formatter.ICellSetFormatter;
-import org.saiku.query.Query;
-import org.saiku.query.QueryDetails;
-import org.saiku.query.QueryHierarchy;
-import org.saiku.query.QueryLevel;
-import org.saiku.query.util.QueryUtil;
-import org.saiku.service.olap.totals.AxisInfo;
-import org.saiku.service.olap.totals.TotalNode;
-import org.saiku.service.olap.totals.TotalsListsBuilder;
-import org.saiku.service.olap.totals.aggregators.TotalAggregator;
-import org.saiku.service.util.KeyValue;
-import org.saiku.service.util.QueryContext;
-import org.saiku.service.util.QueryContext.ObjectKey;
-import org.saiku.service.util.QueryContext.Type;
-import org.saiku.service.util.exception.SaikuServiceException;
-import org.saiku.service.util.export.CsvExporter;
-import org.saiku.service.util.export.ExcelExporter;
-
 import org.olap4j.Axis;
 import org.olap4j.CellSet;
 import org.olap4j.CellSetAxis;
@@ -69,6 +33,57 @@ import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.Member;
+import org.saiku.olap.dto.SaikuCube;
+import org.saiku.olap.dto.SaikuHierarchy;
+import org.saiku.olap.dto.SaikuLevel;
+import org.saiku.olap.dto.SaikuMember;
+import org.saiku.olap.dto.SimpleCubeElement;
+import org.saiku.olap.dto.resultset.AbstractBaseCell;
+import org.saiku.olap.dto.resultset.CellDataSet;
+import org.saiku.olap.query.IQuery;
+import org.saiku.olap.query.IQuery.QueryType;
+import org.saiku.olap.query.OlapQuery;
+import org.saiku.olap.query.QueryDeserializer;
+import org.saiku.olap.query2.ThinAxis;
+import org.saiku.olap.query2.ThinCalculatedMember;
+import org.saiku.olap.query2.ThinHierarchy;
+import org.saiku.olap.query2.ThinLevel;
+import org.saiku.olap.query2.ThinMeasure;
+import org.saiku.olap.query2.ThinMember;
+import org.saiku.olap.query2.ThinQuery;
+import org.saiku.olap.query2.ThinQueryModel;
+import org.saiku.olap.query2.ThinQueryModel.AxisLocation;
+import org.saiku.olap.query2.util.Fat;
+import org.saiku.olap.query2.util.Thin;
+import org.saiku.olap.util.ObjectUtil;
+import org.saiku.olap.util.OlapResultSetUtil;
+import org.saiku.olap.util.QueryConverter;
+import org.saiku.olap.util.SaikuProperties;
+import org.saiku.olap.util.SaikuUniqueNameComparator;
+import org.saiku.olap.util.formatter.CellSetFormatterFactory;
+import org.saiku.olap.util.formatter.FlattenedCellSetFormatter;
+import org.saiku.olap.util.formatter.ICellSetFormatter;
+import org.saiku.query.Query;
+import org.saiku.query.QueryDetails;
+import org.saiku.query.QueryHierarchy;
+import org.saiku.query.QueryLevel;
+import org.saiku.query.util.QueryUtil;
+import org.saiku.service.olap.drillthrough.DimensionResultInfo;
+import org.saiku.service.olap.drillthrough.DrillThroughResult;
+import org.saiku.service.olap.drillthrough.DrillthroughUtils;
+import org.saiku.service.olap.drillthrough.MeasureResultInfo;
+import org.saiku.service.olap.drillthrough.ResultInfo;
+import org.saiku.service.olap.totals.AxisInfo;
+import org.saiku.service.olap.totals.TotalNode;
+import org.saiku.service.olap.totals.TotalsListsBuilder;
+import org.saiku.service.olap.totals.aggregators.TotalAggregator;
+import org.saiku.service.util.KeyValue;
+import org.saiku.service.util.QueryContext;
+import org.saiku.service.util.QueryContext.ObjectKey;
+import org.saiku.service.util.QueryContext.Type;
+import org.saiku.service.util.exception.SaikuServiceException;
+import org.saiku.service.util.export.CsvExporter;
+import org.saiku.service.util.export.ExcelExporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,8 +107,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-
-import mondrian.olap4j.SaikuMondrianHelper;
 
 public class ThinQueryService implements Serializable {
 
@@ -486,6 +499,43 @@ public class ThinQueryService implements Serializable {
             }
         }
 
+    }
+
+    public DrillThroughResult drillthroughWithCaptions(String queryName, List<Integer> cellPosition, Integer maxrows, String returns) {
+    	QueryContext queryContext = context.get(queryName);
+    	SaikuCube saikuCube = queryContext.getOlapQuery().getCube();
+    	List<SaikuMember> measures = olapDiscoverService.getMeasures(saikuCube);
+    	CellSet cs = queryContext.getOlapResult();
+    	ResultSet drillthrough = drillthrough(queryName, cellPosition, maxrows, returns);
+    	
+    	int width;
+		try {
+			width = drillthrough.getMetaData().getColumnCount();
+		} catch (SQLException e) {
+			throw new IllegalStateException(e);
+		}
+    	String[] simpleHeader = new String[width];
+    	AbstractBaseCell[][] cellHeaders = null;
+    	if (StringUtils.isBlank(returns)) {    		
+    		CellDataSet result = OlapResultSetUtil.cellSet2Matrix(cs, cff.forName(StringUtils.EMPTY));
+    		cellHeaders = result.getCellSetHeaders();
+    	} else {
+    		List<ResultInfo> results = DrillthroughUtils.extractResultInfo(returns);
+    		for (int i = 0; i < results.size(); i++) {
+				final ResultInfo ri = results.get(i);
+				if (ri instanceof MeasureResultInfo) {
+					simpleHeader[i] = DrillthroughUtils.findMeasure(measures, ((MeasureResultInfo) ri).getName()).getCaption();
+    			} else if (ri instanceof DimensionResultInfo) {
+    				final DimensionResultInfo dri = (DimensionResultInfo) ri;
+    				List<SaikuHierarchy> hierarchies = olapDiscoverService
+    						.getDimension(saikuCube, dri.getDimension()).getHierarchies();
+    				SaikuHierarchy hierarchy = DrillthroughUtils.findHierarchy(hierarchies, dri.getHierarchy());
+    				SaikuLevel level = DrillthroughUtils.findLevel(hierarchy.getLevels(), dri.getLevel());
+    				simpleHeader[i] = level.getCaption();
+    			}
+			}
+    	}
+    	return new DrillThroughResult(drillthrough, simpleHeader, cellHeaders);
     }
 
     public ResultSet drillthrough(String queryName, List<Integer> cellPosition, Integer maxrows, String returns) {
