@@ -37,24 +37,29 @@ public class DrillthroughUtils {
 			}
 		});
 	}
-	
-	public static List<ResultInfo> extractResultInfo(String returns) {
-		String[] split = returns.split(",");
-		List<ResultInfo> results = new ArrayList<>(); 
-		for (String column: split) {
-			String[] split2 = column.trim().split("\\.");
-			String[] els = new String[split2.length];
-			for (int i = 0; i < split2.length; i++) {
-				String token = split2[i];
-				els[i] = token.trim().replaceAll("[\\[\\]]", "");
-			}
-			if (els[0].equalsIgnoreCase("Measures")) {
-				results.add(new MeasureResultInfo(els[1]));
-			} else {
-				results.add(new DimensionResultInfo(els[0], els[1], els[2]));
-			}
-		}
-		return results;
+
+  public static List<ResultInfo> extractResultInfo(String returns) {
+    String[] split = returns.split(",");
+    List<ResultInfo> results = new ArrayList<>();
+    for (String column: split) {
+      String[] split2 = column.trim().split("\\.");
+      ArrayList<String> els = new ArrayList<>();
+      for (int i = 0; i < split2.length; i++) {
+	String token = split2[i];
+	els.add(token.trim().replaceAll("[\\[\\]]", ""));
+      }
+      if (els.get(0).equalsIgnoreCase("Measures")) {
+	results.add(new MeasureResultInfo(els.get(1)));
+      } else {
+	if(els.size()>=3) {
+	  results.add(new DimensionResultInfo(els.get(0), els.get(1), els.get(2)));
 	}
+	else{
+	  results.add(new DimensionResultInfo(els.get(0), els.get(0), els.get(1)));
+	}
+      }
+    }
+    return results;
+  }
 	
 }

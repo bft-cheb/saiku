@@ -502,40 +502,48 @@ public class ThinQueryService implements Serializable {
     }
 
     public DrillThroughResult drillthroughWithCaptions(String queryName, List<Integer> cellPosition, Integer maxrows, String returns) {
-    	QueryContext queryContext = context.get(queryName);
-    	SaikuCube saikuCube = queryContext.getOlapQuery().getCube();
-    	List<SaikuMember> measures = olapDiscoverService.getMeasures(saikuCube);
-    	CellSet cs = queryContext.getOlapResult();
-    	ResultSet drillthrough = drillthrough(queryName, cellPosition, maxrows, returns);
-    	
-    	int width;
-		try {
-			width = drillthrough.getMetaData().getColumnCount();
-		} catch (SQLException e) {
-			throw new IllegalStateException(e);
-		}
-    	String[] simpleHeader = new String[width];
-    	AbstractBaseCell[][] cellHeaders = null;
-    	if (StringUtils.isBlank(returns)) {    		
-    		CellDataSet result = OlapResultSetUtil.cellSet2Matrix(cs, cff.forName(StringUtils.EMPTY));
-    		cellHeaders = result.getCellSetHeaders();
-    	} else {
-    		List<ResultInfo> results = DrillthroughUtils.extractResultInfo(returns);
-    		for (int i = 0; i < results.size(); i++) {
-				final ResultInfo ri = results.get(i);
-				if (ri instanceof MeasureResultInfo) {
-					simpleHeader[i] = DrillthroughUtils.findMeasure(measures, ((MeasureResultInfo) ri).getName()).getCaption();
-    			} else if (ri instanceof DimensionResultInfo) {
-    				final DimensionResultInfo dri = (DimensionResultInfo) ri;
-    				List<SaikuHierarchy> hierarchies = olapDiscoverService
-    						.getDimension(saikuCube, dri.getDimension()).getHierarchies();
-    				SaikuHierarchy hierarchy = DrillthroughUtils.findHierarchy(hierarchies, dri.getHierarchy());
-    				SaikuLevel level = DrillthroughUtils.findLevel(hierarchy.getLevels(), dri.getLevel());
-    				simpleHeader[i] = level.getCaption();
-    			}
-			}
-    	}
-    	return new DrillThroughResult(drillthrough, simpleHeader, cellHeaders);
+        QueryContext queryContext = context.get(queryName);
+        SaikuCube saikuCube = queryContext.getOlapQuery().getCube();
+        List<SaikuMember> measures = olapDiscoverService.getMeasures(saikuCube);
+        CellSet cs = queryContext.getOlapResult();
+        ResultSet drillthrough = drillthrough(queryName, cellPosition, maxrows, returns);
+
+        int width;
+        try {
+            width = drillthrough.getMetaData().getColumnCount();
+        } catch (SQLException e) {
+            throw new IllegalStateException(e);
+        }
+        String[] simpleHeader = new String[width];
+        AbstractBaseCell[][] cellHeaders = null;
+        if (StringUtils.isBlank(returns)) {
+            CellDataSet result = OlapResultSetUtil.cellSet2Matrix(cs, cff.forName(StringUtils.EMPTY));
+            cellHeaders = result.getCellSetHeaders();
+        } else {
+            List<ResultInfo> results = DrillthroughUtils.extractResultInfo(returns);
+            for (int i = 0; i < results.size(); i++) {
+                final ResultInfo ri = results.get(i);
+                if (ri instanceof MeasureResultInfo) {
+                    simpleHeader[i] = DrillthroughUtils.findMeasure(measures, ((MeasureResultInfo) ri).getName()).getCaption();
+                } else if (ri instanceof DimensionResultInfo) {
+                    final DimensionResultInfo dri = (DimensionResultInfo) ri;
+                    List<SaikuHierarchy> hierarchies = olapDiscoverService
+                      .getDimension(saikuCube, dri.getDimension()).getHierarchies();
+                    SaikuHierarchy hierarchy = null;
+                    try {
+                        hierarchy = DrillthroughUtils
+                          .findHierarchy(hierarchies, dri.getHierarchy());
+                    }
+                    catch(Exception e){
+                        hierarchy = DrillthroughUtils
+                          .findHierarchy(hierarchies, dri.getDimension()+"."+dri.getHierarchy());
+                    }
+                    SaikuLevel level = DrillthroughUtils.findLevel(hierarchy.getLevels(), dri.getLevel());
+                    simpleHeader[i] = level.getCaption();
+                }
+            }
+        }
+        return new DrillThroughResult(drillthrough, simpleHeader, cellHeaders);
     }
 
     public ResultSet drillthrough(String queryName, List<Integer> cellPosition, Integer maxrows, String returns) {

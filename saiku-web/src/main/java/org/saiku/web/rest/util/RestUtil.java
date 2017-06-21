@@ -27,7 +27,6 @@ import org.saiku.service.util.export.ResultSetHelper;
 import org.saiku.web.rest.objects.resultset.Cell;
 import org.saiku.web.rest.objects.resultset.QueryResult;
 import org.saiku.web.rest.objects.resultset.Total;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
 
 public class RestUtil {
@@ -194,46 +192,45 @@ public class RestUtil {
 		return null;
 	}
 
-	public static QueryResult convert(DrillThroughResult drillthrough) throws IOException {
-		
-        Integer height = 0;
-        ResultSetHelper rsch = new ResultSetHelper();
-        ArrayList<Cell[]> rows = new ArrayList<>();
-        AbstractBaseCell[][] cellHeaders = drillthrough.getCellHeaders();
-        String[] simpleHeaders = drillthrough.getSimpleHeaders();
-        ResultSet rs = drillthrough.getResultSet();
-        Integer width = 0;
-        
-        try {
-        	width = rs.getMetaData().getColumnCount();
-			if (Objects.nonNull(cellHeaders)) {
-        		for (AbstractBaseCell headerRow[] : cellHeaders) {
-        			rows.add(convert(headerRow, Cell.Type.COLUMN_HEADER));
-        		}
-        	} else {
-        		Cell[] headerRow = new Cell[width];
-        		for (int s = 0; s < width; s++) {
-		            headerRow[s] = new Cell(simpleHeaders[s], Cell.Type.COLUMN_HEADER);
-		        }
-        		rows.add(headerRow);
-        	}
-			while (rs.next()) {
-			    Cell[] row = new Cell[width];
-			    for (int i = 0; i < width; i++) {
-			    	int colType = rs.getMetaData().getColumnType(i + 1);
-			    	String content = rsch.getValue(rs, colType, i + 1);
-			        if (content == null)
-			            content = "";
-			        row[i] = new Cell(content, Cell.Type.DATA_CELL);
-			    }
-			    rows.add(row);
-			    height++;
-			}
-		} catch (SQLException e) {
-			log.error("SQL Exception", e);
-		}
-		
-		return new QueryResult(rows,0,width,height);
+  public static QueryResult convert(DrillThroughResult drillthrough) throws IOException {
+    Integer height = 0;
+    ResultSetHelper rsch = new ResultSetHelper();
+    ArrayList<Cell[]> rows = new ArrayList<>();
+    AbstractBaseCell[][] cellHeaders = drillthrough.getCellHeaders();
+    String[] simpleHeaders = drillthrough.getSimpleHeaders();
+    ResultSet rs = drillthrough.getResultSet();
+    Integer width = 0;
+
+    try {
+      width = rs.getMetaData().getColumnCount();
+      if (cellHeaders != null) {
+	for (AbstractBaseCell headerRow[] : cellHeaders) {
+	  rows.add(convert(headerRow, Cell.Type.COLUMN_HEADER));
 	}
+      } else {
+	Cell[] headerRow = new Cell[width];
+	for (int s = 0; s < width; s++) {
+	  headerRow[s] = new Cell(simpleHeaders[s], Cell.Type.COLUMN_HEADER);
+	}
+	rows.add(headerRow);
+      }
+      while (rs.next()) {
+	Cell[] row = new Cell[width];
+	for (int i = 0; i < width; i++) {
+	  int colType = rs.getMetaData().getColumnType(i + 1);
+	  String content = rsch.getValue(rs, colType, i + 1);
+	  if (content == null)
+	    content = "";
+	  row[i] = new Cell(content, Cell.Type.DATA_CELL);
+	}
+	rows.add(row);
+	height++;
+      }
+    } catch (SQLException e) {
+      log.error("SQL Exception", e);
+    }
+
+    return new QueryResult(rows,0,width,height);
+  }
 
 }
