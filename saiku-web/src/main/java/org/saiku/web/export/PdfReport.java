@@ -5,17 +5,22 @@ import com.lowagie.text.PageSize;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfWriter;
+import org.apache.avalon.framework.configuration.Configuration;
+import org.apache.avalon.framework.configuration.ConfigurationException;
+import org.apache.avalon.framework.configuration.DefaultConfigurationBuilder;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.print.PrintTranscoder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.FopFactoryBuilder;
 import org.apache.fop.apps.MimeConstants;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.saiku.service.util.export.PdfPerformanceLogger;
 import org.saiku.web.rest.objects.resultset.QueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -25,10 +30,16 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.awt.print.PageFormat;
 import java.awt.print.Paper;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.StringReader;
+import java.net.URI;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -100,7 +111,7 @@ public class PdfReport {
         }
 
         String t = "<?xml version='1.0' encoding='ISO-8859-1'"
-                + " standalone='no'?>" + stringBuffer.toString();
+          + " standalone='no'?>" + stringBuffer.toString();
         PdfContentByte cb = pdfWriter.getDirectContent();
         cb.saveState();
         cb.concatCTM(1.0f, 0, 0, 1.0f, 36, 0);
@@ -151,6 +162,7 @@ public class PdfReport {
         String htmlContent = generateContentAsHtmlString(queryResult);
         org.w3c.dom.Document htmlDom = DomConverter.getDom(htmlContent);
         org.w3c.dom.Document foDoc = FoConverter.getFo(htmlDom);
+
         byte[] formattedPdfContent = fo2Pdf(foDoc, null, queryResultSize);
         tryWritingContentToPdfStream(pdf, formattedPdfContent);
 
@@ -186,9 +198,24 @@ public class PdfReport {
     }
 
     private byte[] fo2Pdf(org.w3c.dom.Document foDocument, String styleSheet, Rectangle size) {
-        FopFactory fopFactory = FopFactory.newInstance();
+        FopFactoryBuilder builder = null;
+
+        DefaultConfigurationBuilder cfgBuilder = new DefaultConfigurationBuilder();
 
         try {
+            File configFile = new File("fonts/fop_config.xml");
+            if (configFile.exists()) {
+                // Specify an external configuration file, to ease user changes, like adding custom fonts
+                Configuration cfg = cfgBuilder.buildFromFile(configFile);
+                builder = new FopFactoryBuilder(configFile.toURI()).setConfiguration(cfg);
+            }
+        } catch (SAXException | IOException | ConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            FopFactory fopFactory = builder != null ? builder.build() : FopFactory.newInstance(URI.create("./"));
+
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, out);
@@ -236,8 +263,8 @@ public class PdfReport {
             return null;
         }
     }
-	
-	 private Rectangle getQueryResultSize(QueryResult queryResult) {
+
+    private Rectangle getQueryResultSize(QueryResult queryResult) {
         int resultWidth = calculateResultWidth(queryResult);
         return calculateDocumentSize(resultWidth);
     }

@@ -32,6 +32,7 @@ dependencies {
     exclude group: 'xerces', module: 'xercesImpl'
   }
 
+  compile group: 'org.apache.xmlgraphics', name: 'fop', version: '2.2'
 
   compile 'javax.ws.rs:jsr311-api:1.1.1'
   compile 'org.codehaus.jettison:jettison:1.2'
