@@ -1,0 +1,33 @@
+def mondrianVersion = '4.3.1.0-169'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'org.saiku'
+            from components.java
+            artifact(sourceJar) { // (2)
+                classifier = 'sources'
+            }
+        }
+    }
+}
+
+dependencies {
+    compile ('org.olap4j:olap4j:1.2.0') {
+        exclude group: 'asm', module: 'asm'
+        exclude group: 'asm', module: 'asm-commons'
+        exclude group: 'retroweaver', module: 'retroweaver'
+        exclude group: 'retroweaver', module: 'retroweaver-rt'
+    }
+    compile(group: 'pentaho', name: 'mondrian', version: mondrianVersion) {
+        exclude group: 'javax.servlet', module: 'jsp-api'
+    }
+    compile 'xml-apis:xml-apis:1.4.01'
+    compile 'commons-lang:commons-lang:2.4'
+
+    testCompile 'junit:junit:3.8.1'
+    testCompile 'hsqldb:hsqldb:1.8.0.10'
+    testCompile 'mysql:mysql-connector-java:5.1.17'
+    testCompile 'xml-apis:xml-apis:1.4.01'
+
+}
