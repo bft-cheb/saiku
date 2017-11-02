@@ -249,6 +249,7 @@ public class SaikuProperties extends Properties {
   public static final String formatDefautNumberFormat = getPropString( "saiku.format.numberformat", "#,##0.00" );
   public static final Locale locale = getLocale();
   public static final Boolean olapConvertQuery = getPropBoolean( "saiku.olap.convert.query", "false" );
+  public static final Boolean OLAP_DIMENSION_SORT = getPropBoolean( "saiku.olap.dimension.sort", "true" );
 
   private static Locale getLocale() {
     String locale = null;
