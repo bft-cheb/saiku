@@ -37,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.mail.internet.MimeUtility;
 import javax.servlet.ServletException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -328,12 +329,15 @@ public class Query2Resource {
         }
         try {
             byte[] doc = thinQueryService.getExport(queryName,"xls",format);
+            String fileName;
             if(name == null || name.equals("")) {
-                name = SaikuProperties.webExportExcelName + "." + SaikuProperties.webExportExcelFormat;
+              fileName = SaikuProperties.webExportExcelName + "." + SaikuProperties.webExportExcelFormat;
+            } else {
+              fileName = MimeUtility.encodeText(name, "UTF-8", null);
             }
             return Response.ok(doc, MediaType.APPLICATION_OCTET_STREAM).header(
                     "content-disposition",
-                    "attachment; filename = " + name).header(
+                    "attachment; filename = " + fileName).header(
                     "content-length",doc.length).build();
         }
         catch (Exception e) {
@@ -647,12 +651,17 @@ public class Query2Resource {
             QueryResult queryResult = RestUtil.convert(cellData);
             PdfReport pdf = new PdfReport();
             byte[] doc  = pdf.createPdf(queryResult, svg);
+
+            String fileName;
+
             if(name==null || name.equals("")){
-                name = "export";
+              fileName = "export.pdf";
+            } else {
+              fileName = MimeUtility.encodeText(name + ".pdf", "UTF-8", null);
             }
             return Response.ok(doc).type("application/pdf").header(
                     "content-disposition",
-                    "attachment; filename = "+name+".pdf").header(
+                    "attachment; filename = "+fileName).header(
                     "content-length",doc.length).build();
         } catch (Exception e) {
             log.error("Error exporting query to  PDF", e);

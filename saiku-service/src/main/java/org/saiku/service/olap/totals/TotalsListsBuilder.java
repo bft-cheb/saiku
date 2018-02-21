@@ -1,5 +1,16 @@
 package org.saiku.service.olap.totals;
 
+import mondrian.util.Format;
+import org.apache.commons.lang.StringUtils;
+import org.olap4j.Axis;
+import org.olap4j.Cell;
+import org.olap4j.CellSet;
+import org.olap4j.OlapException;
+import org.olap4j.Position;
+import org.olap4j.metadata.Cube;
+import org.olap4j.metadata.Measure;
+import org.olap4j.metadata.Member;
+import org.olap4j.metadata.Property;
 import org.saiku.olap.query2.ThinLevel;
 import org.saiku.olap.query2.ThinMeasure;
 import org.saiku.olap.query2.ThinQuery;
@@ -7,16 +18,11 @@ import org.saiku.olap.query2.util.Fat;
 import org.saiku.olap.util.SaikuProperties;
 import org.saiku.service.olap.totals.aggregators.TotalAggregator;
 
-import org.apache.commons.lang.StringUtils;
-import org.olap4j.*;
-import org.olap4j.metadata.Cube;
-import org.olap4j.metadata.Measure;
-import org.olap4j.metadata.Member;
-import org.olap4j.metadata.Property;
-
-import java.util.*;
-
-import mondrian.util.Format;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TotalsListsBuilder implements FormatList {
   private final Member[] memberBranch;
@@ -77,8 +83,8 @@ public class TotalsListsBuilder implements FormatList {
     int measuresAt = 0;
     int measuresMember = 0;
     final List<Member> members =
-            dataAxisInfo.axis.getPositionCount() > 0 ? dataAxisInfo.axis.getPositions().get( 0 ).getMembers() :
-                    Collections.<Member>emptyList();
+      dataAxisInfo.axis.getPositionCount() > 0 ? dataAxisInfo.axis.getPositions().get( 0 ).getMembers() :
+        Collections.<Member>emptyList();
     for (; measuresMember < members.size(); measuresMember++ ) {
       Member m = members.get( measuresMember );
       if ( "Measures".equals( m.getDimension().getName() ) ) {
@@ -100,8 +106,21 @@ public class TotalsListsBuilder implements FormatList {
 
     totalBranch = new TotalNode[ maxDepth ];
 
+    if (aggrTempl[0] == null) {
+      // use BlankAggregator if one off measure has aggregator but total aggregator not selected
+      for (Measure m : measures) {
+        if (m instanceof Fat.MeasureAdapter) {
+          ThinMeasure tm = ((Fat.MeasureAdapter) m).getThinMeasure();
+          if (tm != null && tm.getAggregators() != null && !tm.getAggregators().isEmpty()) {
+            aggrTempl[0] = TotalAggregator.newInstanceByFunctionName("nil");
+            break;
+          }
+        }
+      }
+    }
+
     TotalNode rootNode =
-            new TotalNode( measuresCaptions, measures, aggrTempl[ 0 ], this, totalsAxisInfo.fullPositions.size(), dataAxisInfo);
+      new TotalNode( measuresCaptions, measures, aggrTempl[ 0 ], this, totalsAxisInfo.fullPositions.size(), dataAxisInfo);
     col = Axis.ROWS.equals( dataAxisInfo.axis.getAxisOrdinal() ) ? 1 : 0;
     row = ( col + 1 ) & 1;
     this.aggrTempl = aggrTempl;
@@ -177,7 +196,7 @@ public class TotalsListsBuilder implements FormatList {
 
       int changedFrom = 1;
       while ( changedFrom < memberBranch.length - 1 && memberBranch[ changedFrom ]
-              .equals( prevMemberBranch[ changedFrom ] ) ) {
+        .equals( prevMemberBranch[ changedFrom ] ) ) {
         changedFrom++;
       }
 
@@ -247,7 +266,7 @@ public class TotalsListsBuilder implements FormatList {
 
   private Cell getCellAt( int axisCoord, int perpAxisCoord ) {
     final Position[] positions =
-            new Position[] { dataAxisInfo.fullPositions.get( axisCoord ), totalsAxisInfo.fullPositions.get( perpAxisCoord ) };
+      new Position[] { dataAxisInfo.fullPositions.get( axisCoord ), totalsAxisInfo.fullPositions.get( perpAxisCoord ) };
     return cellSet.getCell( positions[ col ], positions[ row ] );
   }
 
