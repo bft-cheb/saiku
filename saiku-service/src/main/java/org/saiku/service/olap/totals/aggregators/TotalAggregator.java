@@ -19,6 +19,12 @@ public abstract class TotalAggregator {
   static {
     Map<String, TotalAggregatorFactory> tmp = new HashMap<>();
 
+    tmp.put( "not", new TotalAggregatorFactory() {
+      public TotalAggregator create() {
+        return null;
+      }
+    });
+
     tmp.put( "nil", new TotalAggregatorFactory() {
       public TotalAggregator create() {
         return new BlankAggregator( null );
@@ -28,25 +34,25 @@ public abstract class TotalAggregator {
     tmp.put( "sum", new TotalAggregatorFactory() {
       public TotalAggregator create() {
         return new SumAggregator( null );
-      }      
+      }
     });
 
     tmp.put( "max", new TotalAggregatorFactory() {
       public TotalAggregator create() {
         return new MaxAggregator( null );
-      }      
+      }
     });
 
     tmp.put( "min", new TotalAggregatorFactory() {
       public TotalAggregator create() {
         return new MinAggregator( null );
-      }      
+      }
     });
 
     tmp.put( "avg", new TotalAggregatorFactory() {
       public TotalAggregator create() {
         return new AvgAggregator( null );
-      }      
+      }
     });
 
     all = Collections.unmodifiableMap( tmp );
@@ -112,11 +118,10 @@ public abstract class TotalAggregator {
   }
 
   public static TotalAggregator newInstanceByFunctionName( final String functionName ) {
-    if(functionName.equals("not")){
-     return null;
+    if (functionName == null || functionName.trim().length() == 0) {
+      return all.get("not").create();
     }
-    else {
-      return all.get(functionName).create();
-    }
+
+    return all.get(functionName).create();
   }
 }
