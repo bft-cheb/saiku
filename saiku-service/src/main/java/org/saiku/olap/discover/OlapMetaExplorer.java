@@ -130,12 +130,21 @@ public class OlapMetaExplorer {
 	}
 
 	public List<SaikuConnection> getAllConnections() throws SaikuOlapException {
-		List<SaikuConnection> cubesList = new ArrayList<>();
-		for (String connectionName : connections.getAllOlapConnections().keySet()) {
-			cubesList.add(getConnection(connectionName));
-		}
-		Collections.sort(cubesList);
-		return cubesList;
+	  List<SaikuConnection> cubesList = new ArrayList<>();
+	  for (String connectionName : connections.getAllOlapConnections().keySet()) {
+	    SaikuConnection resolveConnection = null;
+	    try {
+	      resolveConnection = getConnection(connectionName);
+	    } catch (Exception ex) {
+	      log.warn("connection " + connectionName + " is not online: " + ex.getLocalizedMessage());
+	    } finally {
+	      if (resolveConnection != null) {
+		cubesList.add(resolveConnection);
+	      }
+	    }
+	  }
+	  Collections.sort(cubesList);
+	  return cubesList;
 	}
 
 
