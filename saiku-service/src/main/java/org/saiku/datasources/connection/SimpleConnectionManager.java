@@ -1,19 +1,19 @@
 package org.saiku.datasources.connection;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.saiku.datasources.datasource.SaikuDatasource;
+import org.saiku.olap.util.exception.SaikuOlapException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.saiku.datasources.datasource.SaikuDatasource;
-import org.saiku.olap.util.exception.SaikuOlapException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class SimpleConnectionManager extends AbstractConnectionManager {
     private Map<String, ISaikuConnection> connections = new HashMap<>();
     private final List<String> errorConnections = new ArrayList<>();
-    private static final Logger log = LoggerFactory.getLogger(SimpleConnectionManager.class);
+    private static final Logger log = LogManager.getLogger(SimpleConnectionManager.class);
  
     
     @Override

@@ -15,28 +15,19 @@
  */
 package org.saiku.web.rest.resources;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.qmino.miredot.annotations.ReturnType;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.olap.dto.SimpleCubeElement;
 import org.saiku.olap.dto.filter.SaikuFilter;
 import org.saiku.service.ISessionService;
 import org.saiku.service.olap.OlapQueryService;
 import org.saiku.service.util.exception.SaikuServiceException;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.qmino.miredot.annotations.ReturnType;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -47,6 +38,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * QueryServlet contains all the methods required when manipulating an OLAP Query.
@@ -58,7 +55,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 @XmlAccessorType(XmlAccessType.NONE)
 public class FilterRepositoryResource {
 
-	private static final Logger log = LoggerFactory.getLogger(FilterRepositoryResource.class);
+	private static final Logger log = LogManager.getLogger(FilterRepositoryResource.class);
 
 	private static final String SETTINGS_FILE = "settings.properties";
 	private static final String FILTER_FILENAME = "saiku.filters";

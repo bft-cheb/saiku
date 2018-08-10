@@ -15,40 +15,60 @@
  */
 package org.saiku.olap.util;
 
-import org.saiku.olap.dto.*;
-import org.saiku.olap.dto.SaikuSelection.Type;
-import org.saiku.olap.query.IQuery;
-import org.saiku.service.util.exception.SaikuServiceException;
-
+import mondrian.olap.Annotation;
+import mondrian.olap4j.Checker;
+import mondrian.olap4j.LevelInterface;
+import mondrian.olap4j.SaikuMondrianHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.olap4j.Axis;
 import org.olap4j.OlapException;
-import org.olap4j.metadata.*;
+import org.olap4j.metadata.Cube;
+import org.olap4j.metadata.Dimension;
+import org.olap4j.metadata.Hierarchy;
+import org.olap4j.metadata.Level;
+import org.olap4j.metadata.Measure;
+import org.olap4j.metadata.Member;
+import org.olap4j.metadata.MetadataElement;
+import org.olap4j.metadata.NamedList;
+import org.olap4j.metadata.Property;
 import org.olap4j.query.QueryAxis;
 import org.olap4j.query.QueryDimension;
 import org.olap4j.query.Selection;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.saiku.olap.dto.SaikuAxis;
+import org.saiku.olap.dto.SaikuCube;
+import org.saiku.olap.dto.SaikuDimension;
+import org.saiku.olap.dto.SaikuDimensionSelection;
+import org.saiku.olap.dto.SaikuHierarchy;
+import org.saiku.olap.dto.SaikuLevel;
+import org.saiku.olap.dto.SaikuMeasure;
+import org.saiku.olap.dto.SaikuMember;
+import org.saiku.olap.dto.SaikuQuery;
+import org.saiku.olap.dto.SaikuSelection;
+import org.saiku.olap.dto.SaikuSelection.Type;
+import org.saiku.olap.dto.SimpleCubeElement;
+import org.saiku.olap.query.IQuery;
+import org.saiku.service.util.exception.SaikuServiceException;
 
 import java.lang.reflect.Constructor;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
-
-import mondrian.olap.Annotation;
-import mondrian.olap4j.Checker;
-import mondrian.olap4j.LevelInterface;
-import mondrian.olap4j.SaikuMondrianHelper;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
  * ObjectUtil.
  */
 public class ObjectUtil {
-  private static final Logger LOG = LoggerFactory.getLogger(ObjectUtil.class);
+  private static final Logger log = LogManager.getLogger(ObjectUtil.class);
 
   private ObjectUtil() {
 
@@ -349,7 +369,7 @@ public class ObjectUtil {
         sax.setFilterCondition(axis.getFilterCondition());
       }
     } catch (Error e) {
-      LOG.error("Could not convert query axis", e);
+      log.error("Could not convert query axis", e);
     }
 
 
@@ -421,7 +441,7 @@ public class ObjectUtil {
               statement.close();
             }
           } catch (Exception ee) {
-            LOG.error("Could not close statement", ee);
+            log.error("Could not close statement", ee);
           }
 
           rs = null;

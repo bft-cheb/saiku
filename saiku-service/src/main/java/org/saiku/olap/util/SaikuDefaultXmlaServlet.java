@@ -16,24 +16,23 @@
 
 package org.saiku.olap.util;
 
+import mondrian.xmla.XmlaHandler;
+import mondrian.xmla.XmlaRequest;
+import mondrian.xmla.impl.DefaultXmlaServlet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.olap4j.OlapConnection;
 import org.saiku.datasources.connection.IConnectionManager;
 import org.saiku.olap.util.exception.SaikuOlapException;
-
-import org.olap4j.OlapConnection;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.Properties;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
-import mondrian.xmla.XmlaHandler;
-import mondrian.xmla.XmlaRequest;
-import mondrian.xmla.impl.DefaultXmlaServlet;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by bugg on 30/03/15.
@@ -41,11 +40,10 @@ import mondrian.xmla.impl.DefaultXmlaServlet;
 public class SaikuDefaultXmlaServlet extends DefaultXmlaServlet{
 
   private static IConnectionManager connections;
+  private Logger log = LogManager.getLogger(SaikuDefaultXmlaServlet.class);
 
   public SaikuDefaultXmlaServlet() {
     super();
-
-
   }
   @Override
   public void init(ServletConfig config) throws ServletException{
@@ -68,7 +66,7 @@ public class SaikuDefaultXmlaServlet extends DefaultXmlaServlet{
           connections.refreshAllConnections();
           return connections.getOlapConnection(System.getProperty("xmla_datasource"));
         } catch (SaikuOlapException e) {
-          e.printStackTrace();
+          log.error("olap error", e);
         }
         return null;
       }

@@ -18,16 +18,22 @@ package org.saiku.web.rest.resources;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.olap.query2.ThinQuery;
 import org.saiku.web.rest.objects.resultset.QueryResult;
 import org.saiku.web.rest.util.ServletUtil;
 import org.saiku.web.svg.Converter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -38,7 +44,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
 
 /**
  * QueryServlet contains all the methods required when manipulating an OLAP Query.
@@ -50,7 +60,7 @@ import java.util.*;
 @XmlAccessorType(XmlAccessType.NONE)
 public class ExporterResource {
 
-	private static final Logger log = LoggerFactory.getLogger(ExporterResource.class);
+	private static final Logger log = LogManager.getLogger(ExporterResource.class);
 
 	private ISaikuRepository repository;
 
@@ -300,7 +310,7 @@ public class ExporterResource {
 	  prop.load(is);
 	  version = prop.getProperty("VERSION");
 	} catch (IOException e) {
-	  e.printStackTrace();
+	  log.error("load file version error", e);
 	}
 	return version;
   }

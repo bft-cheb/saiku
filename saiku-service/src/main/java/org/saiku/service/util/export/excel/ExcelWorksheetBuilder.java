@@ -1,11 +1,19 @@
 package org.saiku.service.util.export.excel;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.SpreadsheetVersion;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -22,15 +30,19 @@ import org.saiku.olap.util.SaikuProperties;
 import org.saiku.service.olap.totals.TotalNode;
 import org.saiku.service.olap.totals.aggregators.TotalAggregator;
 import org.saiku.service.util.exception.SaikuServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 
 /**
  * Created with IntelliJ IDEA. User: sramazzina Date: 21/06/12 Time: 7.35 To
@@ -72,7 +84,7 @@ public class ExcelWorksheetBuilder {
     private HSSFPalette customColorsPalette;
     private ExcelBuilderOptions options;
 
-    private static final Logger log = LoggerFactory.getLogger(ExcelWorksheetBuilder.class);
+    private static final Logger log = LogManager.getLogger(ExcelWorksheetBuilder.class);
 
     public ExcelWorksheetBuilder(CellDataSet table, List<ThinHierarchy> filters, ExcelBuilderOptions options) {
         init(table, filters, options);

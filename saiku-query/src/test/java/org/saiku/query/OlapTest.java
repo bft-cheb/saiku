@@ -1,6 +1,8 @@
 package org.saiku.query;
 
 import junit.framework.TestCase;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.CellSet;
 import org.olap4j.OlapConnection;
 import org.olap4j.OlapException;
@@ -14,15 +16,16 @@ import java.util.List;
 public class OlapTest extends TestCase {
 
 	private TestContext context = TestContext.instance();
+  private Logger log = LogManager.getLogger(OlapTest.class);
 
 
-	public void testConnection() {
+  public void testConnection() {
 		OlapConnection con = context.createConnection();
 		try {
 			assertEquals(1, con.getOlapCatalogs().size());
 			assertEquals("FoodMart", con.getOlapCatalogs().get(0).getName());
 		} catch (OlapException e) {
-			e.printStackTrace();
+		  log.error("olap error", e);
 			fail();
 		}
 	}
@@ -48,7 +51,7 @@ public class OlapTest extends TestCase {
 	        assertEquals("*Subtotal - Bread", member.getName());
 	        assertEquals("*Subtotal - Bread", member.getCaption());
 		} catch (Exception e) {
-			e.printStackTrace();
+		  log.error("error", e);
 		}
 	}
 	
@@ -89,7 +92,7 @@ public class OlapTest extends TestCase {
 			                + "Row #4: 50,236\n"
 			          ,s);
 		} catch (Exception e) {
-			e.printStackTrace();
+		  log.error("olap error", e);
 		}
 	}
 

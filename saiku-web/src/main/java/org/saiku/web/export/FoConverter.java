@@ -1,5 +1,7 @@
 package org.saiku.web.export;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.Transformer;
@@ -10,12 +12,13 @@ import javax.xml.transform.dom.DOMSource;
 
 class FoConverter {
 
+    private static Logger log = LogManager.getLogger(FoConverter.class);
+
     public static Document getFo(Document xmlDoc) {
         try {
             return xml2Fo(xmlDoc);
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage());
-            e.printStackTrace();
+            log.error("get fo error", e);
         }
         return null;
     }

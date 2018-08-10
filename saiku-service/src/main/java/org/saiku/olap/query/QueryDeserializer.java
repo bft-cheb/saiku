@@ -16,6 +16,8 @@
 package org.saiku.olap.query;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -38,8 +40,6 @@ import org.olap4j.query.Selection;
 import org.olap4j.query.SortOrder;
 import org.saiku.olap.dto.SaikuCube;
 import org.saiku.olap.util.exception.QueryParseException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
@@ -58,7 +58,7 @@ import java.util.Properties;
  */
 public class QueryDeserializer {
 
-  private static final Logger log = LoggerFactory.getLogger(QueryDeserializer.class);
+  private static final Logger log = LogManager.getLogger(QueryDeserializer.class);
 
   private static final String QUERY = "Query";
   private static final String CUBE = "cube";

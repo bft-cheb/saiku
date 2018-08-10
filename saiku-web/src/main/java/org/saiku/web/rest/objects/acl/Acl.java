@@ -8,12 +8,11 @@ import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.NameScope;
 import org.apache.commons.vfs.VFS;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
 import org.saiku.web.rest.objects.acl.enumeration.AclMethod;
-import org.saiku.web.rest.resources.BasicRepositoryResource2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,15 +32,12 @@ import java.util.TreeMap;
 public class Acl {
 
   private Map<String, AclEntry> acl = new TreeMap<String, AclEntry>();
-  private static final Logger logger = LoggerFactory.getLogger( Acl.class );
+  private static final Logger log = LogManager.getLogger(Acl.class);
   private static final String SAIKUACCESS_FILE = ".saikuaccess";
 
   private List<String> adminRoles;
   private AclMethod rootMethod = AclMethod.WRITE;
   private FileObject repoRoot;
-
-  private static final Logger log = LoggerFactory.getLogger( BasicRepositoryResource2.class );
-
 
   public void setPath( String path ) throws Exception {
     FileSystemManager fileSystemManager;
@@ -88,7 +84,6 @@ public class Acl {
   /**
    * Returns the access method to the specified resource for the user or role
    *
-   * @param resource the resource to which you want to access
    * @param username the username of the user that's accessing
    * @param roles    the role of the user that's accessing
    * @return {@link AclMethod}
@@ -166,7 +161,7 @@ public class Acl {
 
       return getAllAcls( method );
     } catch ( Exception e ) {
-      logger.error( "Cannot get methods for: " + path, e );
+      log.error( "Cannot get methods for: " + path, e );
     }
     List<AclMethod> noMethod = new ArrayList<AclMethod>();
     noMethod.add( AclMethod.NONE );
@@ -188,7 +183,6 @@ public class Acl {
   /**
    * helper method to add an acl entry
    *
-   * @param resource resource for which we're setting the access control
    * @param entry
    */
   public void addEntry( String path, AclEntry entry ) {
@@ -198,7 +192,7 @@ public class Acl {
         writeAcl( path, entry );
       }
     } catch ( Exception e ) {
-      logger.error( "Cannot add entry for resource: " + path, e );
+      log.error( "Cannot add entry for resource: " + path, e );
     }
   }
 
@@ -257,14 +251,12 @@ public class Acl {
         }
       }
     } catch ( Exception e ) {
-      logger.error( "Error while reading ACL files at path: " + path, e );
+      log.error( "Error while reading ACL files at path: " + path, e );
     }
   }
 
   /**
    * writes the acl of the resource in the resource's directory
-   *
-   * @param resource
    */
   private void writeAcl( String path, AclEntry entry ) throws Exception {
     FileObject accessFile = getAccessFile( path );
@@ -282,7 +274,7 @@ public class Acl {
       accessFile.delete();
       mapper.writeValue( accessFile.getContent().getOutputStream(), map );
     } catch ( Exception e ) {
-      logger.error( "Error writing data to file", e );
+      log.error( "Error writing data to file", e );
     }
   }
 
@@ -297,7 +289,7 @@ public class Acl {
           .mapType( HashMap.class, String.class, AclEntry.class ) );
       }
     } catch ( Exception e ) {
-      logger.error( "Error reading the json file:" + accessFile, e );
+      log.error( "Error reading the json file:" + accessFile, e );
     }
 
     return acl;
@@ -361,7 +353,7 @@ public class Acl {
         }
       }
     } catch ( Exception e ) {
-      logger.error( "Error getting hold of the access file for " + path, e );
+      log.error( "Error getting hold of the access file for " + path, e );
     }
     return accessFile;
   }

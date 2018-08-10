@@ -17,13 +17,11 @@
 package org.saiku.web.service;
 
 import org.apache.commons.lang.StringUtils;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.repository.ScopedRepo;
 import org.saiku.service.ISessionService;
 import org.saiku.service.util.security.authorisation.AuthorisationPredicate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -35,21 +33,18 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.web.context.request.RequestContextHolder;
 
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.jcr.RepositoryException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 
 public class SessionService implements ISessionService {
 
-  private static final Logger log = LoggerFactory.getLogger(SessionService.class);
+  private static final Logger log = LogManager.getLogger(SessionService.class);
 
   private AuthenticationManager authenticationManager;
   private AuthorisationPredicate authorisationPredicate;

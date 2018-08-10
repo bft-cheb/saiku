@@ -15,25 +15,27 @@
  */
 package org.saiku.web.rest.resources;
 
+import com.qmino.miredot.annotations.ReturnType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.datasources.datasource.SaikuDatasource;
 import org.saiku.service.datasource.DatasourceService;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.saiku.web.rest.objects.DataSourceMapper;
-
-import com.qmino.miredot.annotations.ReturnType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Data Source Manipulation Utility Endpoints
@@ -42,7 +44,7 @@ import javax.ws.rs.core.Response.Status;
 @Path("/saiku/{username}/org.saiku.datasources")
 public class DataSourceResource {
 
-    private static final Logger log = LoggerFactory.getLogger(DataSourceResource.class);
+    private static final Logger log = LogManager.getLogger(DataSourceResource.class);
     private DatasourceService datasourceService;
 
     public void setDatasourceService(DatasourceService ds) {

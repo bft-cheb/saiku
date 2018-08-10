@@ -1,18 +1,23 @@
 package org.saiku.repository;
 
+import org.apache.jackrabbit.server.BasicCredentialsProvider;
+import org.apache.jackrabbit.webdav.DavException;
+import org.apache.jackrabbit.webdav.DavMethods;
+import org.apache.jackrabbit.webdav.DavResource;
+import org.apache.jackrabbit.webdav.DavServletResponse;
+import org.apache.jackrabbit.webdav.WebdavRequest;
+import org.apache.jackrabbit.webdav.WebdavRequestImpl;
+import org.apache.jackrabbit.webdav.WebdavResponse;
+import org.apache.jackrabbit.webdav.WebdavResponseImpl;
+import org.apache.jackrabbit.webdav.simple.SimpleWebdavServlet;
+import org.apache.jackrabbit.webdav.util.CSRFUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.database.dto.SaikuUser;
 import org.saiku.service.datasource.RepositoryDatasourceManager;
 import org.saiku.service.user.UserService;
-
-import org.apache.jackrabbit.server.BasicCredentialsProvider;
-import org.apache.jackrabbit.webdav.*;
-import org.apache.jackrabbit.webdav.simple.SimpleWebdavServlet;
-import org.apache.jackrabbit.webdav.util.CSRFUtil;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
-
-import java.io.IOException;
-import java.util.List;
 
 import javax.jcr.LoginException;
 import javax.jcr.Repository;
@@ -22,6 +27,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by bugg on 04/09/14.
@@ -32,6 +39,7 @@ public final class SaikuWebdavServlet extends SimpleWebdavServlet {
     private RepositoryDatasourceManager bean;
   private CSRFUtil csrfUtil;
   private UserService us;
+  private Logger log = LogManager.getLogger(SaikuWebdavServlet.class);
 
   @Override
     public void init(ServletConfig config) throws ServletException {
@@ -55,7 +63,7 @@ public final class SaikuWebdavServlet extends SimpleWebdavServlet {
       try {
         creds = (SimpleCredentials) b.getCredentials(request);
       } catch (LoginException | ServletException e) {
-        e.printStackTrace();
+        log.error("login error", e);
       }
       if (u.getUsername().equals(creds.getUserID())) {
         String[] roles = us.getRoles(u);

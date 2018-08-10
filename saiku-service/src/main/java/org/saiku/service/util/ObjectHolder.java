@@ -15,10 +15,10 @@
  */
 package org.saiku.service.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.olap.query.IQuery;
 import org.saiku.service.util.exception.SaikuServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ class ObjectHolder {
 
   private final ThreadLocal<Map<String, IQuery>> threadQueries = new ThreadLocal<>();
 
-  private static final Logger LOG = LoggerFactory.getLogger( ObjectHolder.class );
+  private static final Logger log = LogManager.getLogger(ObjectHolder.class);
 
   public void putIQuery( String queryName, IQuery query ) {
     getIQueryMap().put( queryName, query );
@@ -47,7 +47,7 @@ class ObjectHolder {
   }
 
   private Map<String, IQuery> getIQueryMap() {
-    LOG.trace(
+    log.trace(
       "ObjectHoler.getIQueryMap : Thread ID " + Thread.currentThread().getId() + " Name: " + Thread.currentThread()
         .getName() );
     if ( threadQueries.get() == null ) {

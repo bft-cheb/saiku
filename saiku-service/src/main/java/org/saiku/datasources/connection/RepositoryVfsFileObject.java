@@ -9,12 +9,11 @@ import org.apache.commons.vfs.FileSystemException;
 import org.apache.commons.vfs.FileType;
 import org.apache.commons.vfs.NameScope;
 import org.apache.commons.vfs.operations.FileOperations;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.service.datasource.IDatasourceManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import javax.jcr.RepositoryException;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -24,12 +23,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import javax.jcr.RepositoryException;
-
 public class RepositoryVfsFileObject
         implements FileObject
 {
-    private static final Logger log = LoggerFactory.getLogger(RepositoryVfsFileObject.class);
+    private static final Logger log = LogManager.getLogger(RepositoryVfsFileObject.class);
     private String fileRef;
     private boolean fileInitialized;
     private RepositoryFile repositoryFile;

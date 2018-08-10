@@ -1,11 +1,10 @@
 package org.saiku.olap.util.formatter;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.service.olap.ThinQueryService;
 import org.saiku.service.util.exception.SaikuServiceException;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -13,7 +12,7 @@ import java.util.Map;
 
 public class CellSetFormatterFactory {
 
-	private static final Logger log = LoggerFactory.getLogger(ThinQueryService.class);
+	private static final Logger log = LogManager.getLogger(ThinQueryService.class);
 
 	private Map<String, String> formatters = new HashMap<>();
 

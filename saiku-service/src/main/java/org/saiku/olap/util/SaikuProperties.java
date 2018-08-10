@@ -16,8 +16,8 @@
 package org.saiku.olap.util;
 
 import org.apache.commons.lang.LocaleUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +36,7 @@ public class SaikuProperties extends Properties {
 
   private static final long serialVersionUID = 4835692048422342660L;
 
-  private static final Logger log = LoggerFactory.getLogger( SaikuProperties.class );
+  private static final Logger log = LogManager.getLogger(SaikuProperties.class);
 
 
   private final PropertySource propertySource;

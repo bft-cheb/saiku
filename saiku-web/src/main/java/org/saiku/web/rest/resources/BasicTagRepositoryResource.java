@@ -15,42 +15,12 @@
  */
 package org.saiku.web.rest.resources;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.URLDecoder;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.VFS;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonAutoDetect.Visibility;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.type.TypeFactory;
@@ -69,10 +39,39 @@ import org.saiku.olap.util.SaikuProperties;
 import org.saiku.service.olap.OlapQueryService;
 import org.saiku.service.util.KeyValue;
 import org.saiku.service.util.exception.SaikuServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.net.URLDecoder;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * QueryServlet contains all the methods required when manipulating an OLAP Query.
@@ -84,7 +83,7 @@ import org.springframework.stereotype.Component;
 @XmlAccessorType(XmlAccessType.NONE)
 public class BasicTagRepositoryResource {
 
-	private static final Logger log = LoggerFactory.getLogger(BasicTagRepositoryResource.class);
+	private static final Logger log = LogManager.getLogger(BasicTagRepositoryResource.class);
 
 	private OlapQueryService olapQueryService;
 
@@ -108,7 +107,7 @@ public class BasicTagRepositoryResource {
 			}
 			repo = fileObject;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("path error", e);
 		}
 
 	}
@@ -153,7 +152,6 @@ public class BasicTagRepositoryResource {
 			}
 		} catch (Exception e) {
 			log.error(this.getClass().getName(),e);
-			e.printStackTrace();
 		}
 		Collections.sort(allTags);
 		return allTags;

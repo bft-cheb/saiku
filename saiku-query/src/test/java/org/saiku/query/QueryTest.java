@@ -1,6 +1,8 @@
 package org.saiku.query;
 
 import junit.framework.TestCase;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.Axis;
 import org.olap4j.CellSet;
 import org.olap4j.OlapConnection;
@@ -27,6 +29,7 @@ import org.saiku.query.metadata.CalculatedMember;
 public class QueryTest extends TestCase {
 
   private TestContext context = TestContext.instance();
+  private Logger log = LogManager.getLogger(QueryTest.class);
 
 
   public void testSimpleQuery() {
@@ -77,7 +80,7 @@ public class QueryTest extends TestCase {
       TestUtil.assertEqualsVerbose(expectedQuery, mdxString);
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -117,7 +120,7 @@ public class QueryTest extends TestCase {
           + "Row #0: 4,186\n",
         s);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -173,7 +176,7 @@ public class QueryTest extends TestCase {
 
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -232,7 +235,7 @@ public class QueryTest extends TestCase {
           + "Row #0: 969\n",
         s);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -305,7 +308,7 @@ public class QueryTest extends TestCase {
           + "Row #0: 293\n",
         s);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -394,7 +397,7 @@ public class QueryTest extends TestCase {
           + "Row #0: 27,704\n",
         s);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -461,7 +464,7 @@ public class QueryTest extends TestCase {
 
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -567,7 +570,7 @@ public class QueryTest extends TestCase {
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -633,7 +636,7 @@ public class QueryTest extends TestCase {
       }
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -749,7 +752,7 @@ public class QueryTest extends TestCase {
 
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -869,7 +872,7 @@ public class QueryTest extends TestCase {
 
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -969,7 +972,7 @@ public class QueryTest extends TestCase {
         s);
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -1026,7 +1029,7 @@ public class QueryTest extends TestCase {
           + "Row #1: \n",
         s);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -1065,7 +1068,7 @@ public class QueryTest extends TestCase {
       TestUtil.assertEqualsVerbose(expectedQuery, mdxString);
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -1136,7 +1139,7 @@ public class QueryTest extends TestCase {
         s);
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }
@@ -1235,7 +1238,7 @@ public class QueryTest extends TestCase {
 
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("error", e);
       fail();
     }
   }

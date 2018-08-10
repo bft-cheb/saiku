@@ -1,3 +1,5 @@
+apply plugin: 'project-report'
+
 def mondrianVersion = '4.3.1.0-169'
 
 publishing {
@@ -18,12 +20,22 @@ dependencies {
         exclude group: 'asm', module: 'asm-commons'
         exclude group: 'retroweaver', module: 'retroweaver'
         exclude group: 'retroweaver', module: 'retroweaver-rt'
+        exclude group: 'xerces', module: 'xercesImpl'
     }
     compile(group: 'pentaho', name: 'mondrian', version: mondrianVersion) {
         exclude group: 'javax.servlet', module: 'jsp-api'
+        exclude group: 'xerces', module: 'xerces'
+        exclude group: 'xerces', module: 'xercesImpl'
+        exclude group: 'log4j', module: 'log4j'
     }
     compile 'xml-apis:xml-apis:1.4.01'
     compile 'commons-lang:commons-lang:2.4'
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.10.0'
+
+    compile group: 'org.opengis.cite.xerces', name: 'xercesImpl-xsd11', version: '2.12-beta-r1667115'
 
     testCompile 'junit:junit:3.8.1'
     testCompile 'hsqldb:hsqldb:1.8.0.10'

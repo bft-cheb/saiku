@@ -1,23 +1,5 @@
 package org.saiku.web.svg;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.print.PageFormat;
-import java.awt.print.Paper;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.print.PrintTranscoder;
-import org.apache.commons.lang.StringUtils;
-import org.saiku.olap.dto.resultset.CellDataSet;
-import org.saiku.olap.dto.resultset.DataCell;
-
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -32,12 +14,28 @@ import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.print.PrintTranscoder;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.saiku.olap.dto.resultset.CellDataSet;
+import org.saiku.olap.dto.resultset.DataCell;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.print.PageFormat;
+import java.awt.print.Paper;
+import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class PdfReport {
     private final ReportData section= new ReportData();
-    private static final Logger log = LoggerFactory.getLogger(PdfReport.class);
+    private static final Logger log = LogManager.getLogger(PdfReport.class);
 
     public byte[] pdf(CellDataSet c, String svg) {
 		section.setRowBody(c.getCellSetBody());

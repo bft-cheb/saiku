@@ -17,8 +17,8 @@
 package org.saiku.log;
 
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.io.IOException;
 public class LogExtractor {
 
   private String logdirectory;
-  private static final Logger log = LoggerFactory.getLogger(LogExtractor.class);
+  private static final Logger log = LogManager.getLogger(LogExtractor.class);
 
   public String readLog(String path) throws IOException {
       if(path.contains("..")){

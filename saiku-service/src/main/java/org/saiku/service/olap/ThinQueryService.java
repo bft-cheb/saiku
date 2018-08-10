@@ -17,6 +17,8 @@ package org.saiku.service.olap;
 
 import mondrian.olap4j.SaikuMondrianHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.Axis;
 import org.olap4j.CellSet;
 import org.olap4j.CellSetAxis;
@@ -84,8 +86,6 @@ import org.saiku.service.util.QueryContext.Type;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.saiku.service.util.export.CsvExporter;
 import org.saiku.service.util.export.ExcelExporter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -112,7 +112,7 @@ public class ThinQueryService implements Serializable {
      */
     private static final long serialVersionUID = -7615296596528274904L;
 
-    private static final Logger log = LoggerFactory.getLogger(ThinQueryService.class);
+    private static final Logger log = LogManager.getLogger(ThinQueryService.class);
 
     private static final AtomicLong ID_GENERATOR = new AtomicLong();
 

@@ -15,24 +15,27 @@
  */
 package org.saiku.web.rest.resources;
 
+import com.qmino.miredot.annotations.ReturnType;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.service.ISessionService;
 import org.saiku.service.user.UserService;
-
-import com.qmino.miredot.annotations.ReturnType;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import java.util.Map;
 
 
 /**
@@ -43,7 +46,7 @@ import javax.ws.rs.core.Response.Status;
 public class SessionResource  {
 
 
-	private static final Logger log = LoggerFactory.getLogger(SessionResource.class);
+	private static final Logger log = LogManager.getLogger(SessionResource.class);
 
 	private ISessionService sessionService;
     private UserService userService;

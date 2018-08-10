@@ -16,36 +16,23 @@
 package org.saiku.web.rest.resources;
 
 
+import com.qmino.miredot.annotations.ReturnType;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.VFS;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.repository.AclEntry;
 import org.saiku.repository.IRepositoryObject;
 import org.saiku.service.ISessionService;
 import org.saiku.service.datasource.DatasourceService;
 import org.saiku.service.util.exception.SaikuServiceException;
-
-import com.qmino.miredot.annotations.ReturnType;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -58,6 +45,15 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * QueryServlet contains all the methods required when manipulating an OLAP Query.
@@ -68,7 +64,7 @@ import javax.ws.rs.core.Response.Status;
 @Path("/saiku/api/repository")
 public class BasicRepositoryResource2 implements ISaikuRepository {
 
-  private static final Logger log = LoggerFactory.getLogger(BasicRepositoryResource2.class);
+  private static final Logger log = LogManager.getLogger(BasicRepositoryResource2.class);
 
   private ISessionService sessionService;
 

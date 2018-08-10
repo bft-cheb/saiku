@@ -15,6 +15,8 @@
  */
 package org.saiku.query;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.OlapException;
 import org.olap4j.impl.IdentifierParser;
 import org.olap4j.impl.Named;
@@ -33,6 +35,7 @@ import java.util.List;
 
 public class QueryHierarchy extends AbstractSortableQuerySet implements Named {
   private final NamedList<RootMember> rootMembers = new NamedListImpl();
+  private final Logger log = LogManager.getLogger(QueryHierarchy.class);
   protected QueryAxis axis;
   private final Query query;
   private final Hierarchy hierarchy;
@@ -65,7 +68,7 @@ public class QueryHierarchy extends AbstractSortableQuerySet implements Named {
 	this.rootMembers.add(rootMember);
       }
     } catch (OlapException var7) {
-      var7.printStackTrace();
+      log.error("olap error", var7);
     }
 
   }

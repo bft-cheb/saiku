@@ -1,19 +1,19 @@
 package org.saiku.web.core;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.saiku.datasources.datasource.SaikuDatasource;
+import org.saiku.service.datasource.IDatasourceProcessor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.saiku.datasources.datasource.SaikuDatasource;
-import org.saiku.service.datasource.IDatasourceProcessor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 public class RoleDatasourceProcessor implements IDatasourceProcessor {
 
-	private static final Logger log = LoggerFactory.getLogger(RoleDatasourceProcessor.class);
+	private static final Logger log = LogManager.getLogger(RoleDatasourceProcessor.class);
 
   public SaikuDatasource process(SaikuDatasource ds) {
 		if (SecurityContextHolder.getContext() != null && SecurityContextHolder.getContext().getAuthentication() != null) {			

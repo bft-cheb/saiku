@@ -3,15 +3,20 @@ package org.saiku.service.importer;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.VFS;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.datasources.datasource.SaikuDatasource;
 import org.saiku.repository.IRepositoryManager;
 import org.saiku.service.datasource.IDatasourceManager;
-import org.saiku.service.importer.LegacyImporter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.jcr.RepositoryException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -24,7 +29,7 @@ import java.util.zip.ZipInputStream;
  * Created by bugg on 19/06/14.
  */
 public class LegacyImporterImpl implements LegacyImporter {
-    private static final Logger log = LoggerFactory.getLogger(LegacyImporter.class);
+    private static final Logger log = LogManager.getLogger(LegacyImporter.class);
     private final IDatasourceManager dsm;
 
     private URL repoURL;
@@ -55,7 +60,7 @@ public class LegacyImporterImpl implements LegacyImporter {
                             try {
                                 encoded = org.apache.commons.io.IOUtils.toByteArray(new FileInputStream(file));
                             } catch (IOException e1) {
-                                e1.printStackTrace();
+                                log.error("encoding file error", e1);
                             }
                             String str = null;
                             if (encoded != null) {
@@ -67,7 +72,7 @@ public class LegacyImporterImpl implements LegacyImporter {
                 }
             }
             } catch (Exception e1) {
-            e1.printStackTrace();
+            log.error("error", e1);
         }
 
     }
@@ -85,7 +90,7 @@ public class LegacyImporterImpl implements LegacyImporter {
                             try {
                                 props.load(new FileInputStream(file));
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                log.error("load file error", e);
                             }
                             String name = props.getProperty("name");
                             String type = props.getProperty("type");
@@ -127,7 +132,7 @@ public class LegacyImporterImpl implements LegacyImporter {
 
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("error", e);
         }
     }
 
@@ -169,7 +174,7 @@ public class LegacyImporterImpl implements LegacyImporter {
         try {
             ze = zis.getNextEntry();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("extract zip error", e);
         }
         String strUnzipped = "";
         while(ze!=null){
@@ -182,7 +187,7 @@ public class LegacyImporterImpl implements LegacyImporter {
             try {
                 fos = new FileOutputStream(fileName);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                log.error("error", e);
             }
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             try {
@@ -193,7 +198,7 @@ public class LegacyImporterImpl implements LegacyImporter {
                 bos.close();
                 strUnzipped= new String( bos.toByteArray(), "UTF-8" );
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("extract zip error", e);
             }
 
 
@@ -201,26 +206,26 @@ public class LegacyImporterImpl implements LegacyImporter {
             try {
                 repositoryManager.saveInternalFile(strUnzipped, "/etc/legacyreports/"+fileName, "nt:saikufiles");
             } catch (RepositoryException e) {
-                e.printStackTrace();
+                log.error("save file error", e);
             }
 
 
             try {
                 ze = zis.getNextEntry();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("extract zip error", e);
             }
         }
 
         try {
             zis.closeEntry();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("close zip error", e);
         }
         try {
             zis.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("close zip error", e);
         }
     }
 

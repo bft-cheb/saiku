@@ -16,6 +16,7 @@
 package org.saiku.repository;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jackrabbit.api.JackrabbitRepository;
 import org.apache.jackrabbit.api.JackrabbitSession;
@@ -25,30 +26,12 @@ import org.apache.jackrabbit.api.security.user.UserManager;
 import org.apache.jackrabbit.commons.JcrUtils;
 import org.apache.jackrabbit.core.RepositoryImpl;
 import org.apache.jackrabbit.core.config.RepositoryConfig;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.database.dto.MondrianSchema;
 import org.saiku.datasources.connection.RepositoryFile;
 import org.saiku.service.user.UserService;
 import org.saiku.service.util.exception.SaikuServiceException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import javax.jcr.Binary;
 import javax.jcr.ImportUUIDBehavior;
@@ -71,13 +54,26 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * JackRabbit JCR Repository Manager for Saiku.
  */
 public class JackRabbitRepositoryManager implements IRepositoryManager {
 
-  private static final Logger log = LoggerFactory.getLogger(JackRabbitRepositoryManager.class);
+  private static final Logger log = LogManager.getLogger(JackRabbitRepositoryManager.class);
   private static JackRabbitRepositoryManager ref;
   private final String data;
   private final String config;
@@ -831,13 +827,13 @@ public class JackRabbitRepositoryManager implements IRepositoryManager {
     try {
       n = getFolder(fileUrl);
     } catch (RepositoryException e) {
-      e.printStackTrace();
+      log.error("get folder error", e);
     }
 
     try {
       return new RepositoryFile(n != null ? n.getName() : null, null, null, fileUrl);
     } catch (RepositoryException e) {
-      e.printStackTrace();
+      log.error("error", e);
     }
 
     return null;

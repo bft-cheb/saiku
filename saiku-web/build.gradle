@@ -1,3 +1,5 @@
+apply plugin: 'project-report'
+
 def springVersion = '4.0.3.RELEASE'
 def final jerseyVersion = 1.11
 
@@ -14,10 +16,12 @@ publishing {
 }
 
 dependencies {
-  compile group: 'com.itextpdf.tool', name: 'xmlworker', version: '5.5.0'
-  compile projectSaiku(':saiku-service')
-  compile group: 'org.springframework', name: 'spring-core', version: springVersion
+  compile (projectSaiku(':saiku-service')) {
+    exclude group: 'xerces', module: 'xercesImpl'
+  }
 
+  compile group: 'com.itextpdf.tool', name: 'xmlworker', version: '5.5.0'
+  compile group: 'org.springframework', name: 'spring-core', version: springVersion
   compile group: 'org.springframework', name: 'spring-aop', version: springVersion
   compile group: 'org.springframework', name: 'spring-context', version: springVersion
   compile group: 'org.springframework', name: 'spring-context-support', version: springVersion

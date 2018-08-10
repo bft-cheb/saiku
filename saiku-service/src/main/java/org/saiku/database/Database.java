@@ -4,13 +4,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.VFS;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.h2.jdbcx.JdbcDataSource;
 import org.saiku.datasources.datasource.SaikuDatasource;
 import org.saiku.service.datasource.IDatasourceManager;
 import org.saiku.service.importer.LegacyImporter;
 import org.saiku.service.importer.LegacyImporterImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -50,7 +50,7 @@ public class Database {
 
 
     private JdbcDataSource ds;
-    private static final Logger log = LoggerFactory.getLogger(Database.class);
+    private static final Logger log = LogManager.getLogger(Database.class);
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private IDatasourceManager dsm;
     public Database() {
@@ -212,7 +212,7 @@ public class Database {
                     }
 
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("save file error", e);
                 }
 
             }
@@ -374,7 +374,7 @@ public class Database {
                             try {
                                 si = new ObjectInputStream(new FileInputStream(file));
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                log.error("save file error", e);
                             }
 
                             try {
@@ -392,12 +392,12 @@ public class Database {
                                 data = dataStream.toByteArray();
                                 dataStream.close();
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                log.error("save file error", e);
                             } finally {
                                 try {
                                     si.close();
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+                                    log.error("save file error", e);
                                 }
                             }
 
@@ -406,7 +406,7 @@ public class Database {
                 }
             }
         } catch (Exception e1) {
-            e1.printStackTrace();
+            log.error("error", e1);
         }
     }
 }

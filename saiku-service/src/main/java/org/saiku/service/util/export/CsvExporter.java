@@ -16,6 +16,8 @@
 package org.saiku.service.util.export;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.CellSet;
 import org.saiku.olap.dto.resultset.AbstractBaseCell;
 import org.saiku.olap.dto.resultset.CellDataSet;
@@ -27,8 +29,6 @@ import org.saiku.olap.util.formatter.CellSetFormatter;
 import org.saiku.olap.util.formatter.ICellSetFormatter;
 import org.saiku.service.util.KeyValue;
 import org.saiku.service.util.exception.SaikuServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import java.util.List;
 
 public class CsvExporter {
 
-  private static final Logger log = LoggerFactory.getLogger(CsvExporter.class);
+  private static final Logger log = LogManager.getLogger(CsvExporter.class);
 
   public static byte[] exportCsv( CellSet cellSet ) {
     return exportCsv( cellSet, SaikuProperties.webExportCsvDelimiter, SaikuProperties.webExportCsvTextEscape );

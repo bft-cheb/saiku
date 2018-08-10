@@ -1,12 +1,11 @@
 package org.saiku.web.rest.resources;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.vfs.FileObject;
 import org.apache.commons.vfs.FileSystemManager;
 import org.apache.commons.vfs.VFS;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.service.ISessionService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.ws.rs.FormParam;
@@ -29,7 +28,7 @@ import java.io.OutputStreamWriter;
 @Path("/saiku/{username}/schemarepository")
 @XmlAccessorType(XmlAccessType.NONE)
 public class BasicSchemaResource {
-  private static final Logger log = LoggerFactory.getLogger(BasicSchemaResource.class);
+  private static final Logger log = LogManager.getLogger(BasicSchemaResource.class);
 
   private FileObject repo;
   private ISessionService sessionService;

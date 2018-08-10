@@ -1,7 +1,7 @@
 package org.saiku.service.util.export;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
 
@@ -9,7 +9,7 @@ import java.util.Date;
  * Class to log the load of converting queries to PDF's.
  */
 public class PdfPerformanceLogger{
-    private static final Logger log = LoggerFactory.getLogger(PdfPerformanceLogger.class);
+    private static final Logger log = LogManager.getLogger(PdfPerformanceLogger.class);
 
     private final long start;
     private long queryToHtmlStart;

@@ -15,11 +15,11 @@ import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.FopFactoryBuilder;
 import org.apache.fop.apps.MimeConstants;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.saiku.service.util.export.PdfPerformanceLogger;
 import org.saiku.web.rest.objects.resultset.QueryResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -49,7 +49,7 @@ import java.util.Date;
  */
 public class PdfReport {
 
-    private static final Logger log = LoggerFactory.getLogger(PdfReport.class);
+    private static final Logger log = LogManager.getLogger(PdfReport.class);
 
     private static final float marginLeft = 15;
     private static final float marginRight = 15;
@@ -174,11 +174,9 @@ public class PdfReport {
         try {
             pdf.write(formattedPdfContent);
         } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
-            System.out.println("Error creating PDF: ");
+            log.error("Error creating PDF:", e);
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Error writing PDF: ");
+            log.error("Error writing PDF:", e);
         }
     }
 
@@ -250,16 +248,16 @@ public class PdfReport {
 
             return tFactory.newTransformer(xslDomSource);
         } catch (javax.xml.transform.TransformerException e) {
-            e.printStackTrace();
+            log.error("transform error", e);
             return null;
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            log.error("io error", e);
             return null;
         } catch (javax.xml.parsers.ParserConfigurationException e) {
-            e.printStackTrace();
+            log.error("parser error", e);
             return null;
         } catch (org.xml.sax.SAXException e) {
-            e.printStackTrace();
+            log.error("xml error", e);
             return null;
         }
     }

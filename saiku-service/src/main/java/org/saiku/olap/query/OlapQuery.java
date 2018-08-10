@@ -15,6 +15,28 @@
  */
 package org.saiku.olap.query;
 
+import mondrian.rolap.RolapConnection;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.olap4j.Axis;
+import org.olap4j.Axis.Standard;
+import org.olap4j.CellSet;
+import org.olap4j.OlapConnection;
+import org.olap4j.OlapStatement;
+import org.olap4j.Scenario;
+import org.olap4j.impl.IdentifierParser;
+import org.olap4j.mdx.ParseTreeWriter;
+import org.olap4j.mdx.SelectNode;
+import org.olap4j.metadata.Catalog;
+import org.olap4j.metadata.Cube;
+import org.olap4j.query.LimitFunction;
+import org.olap4j.query.Query;
+import org.olap4j.query.QueryAxis;
+import org.olap4j.query.QueryDimension;
+import org.olap4j.query.QueryDimension.HierarchizeMode;
+import org.olap4j.query.Selection;
+import org.olap4j.query.SortOrder;
 import org.saiku.olap.dto.SaikuCube;
 import org.saiku.olap.dto.SaikuTag;
 import org.saiku.olap.dto.filter.SaikuFilter;
@@ -27,19 +49,6 @@ import org.saiku.olap.util.exception.SaikuOlapException;
 import org.saiku.olap.util.formatter.ICellSetFormatter;
 import org.saiku.service.util.exception.SaikuServiceException;
 
-import org.apache.commons.lang.StringUtils;
-import org.olap4j.*;
-import org.olap4j.Axis.Standard;
-import org.olap4j.impl.IdentifierParser;
-import org.olap4j.mdx.ParseTreeWriter;
-import org.olap4j.mdx.SelectNode;
-import org.olap4j.metadata.Catalog;
-import org.olap4j.metadata.Cube;
-import org.olap4j.query.*;
-import org.olap4j.query.QueryDimension.HierarchizeMode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -48,12 +57,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import mondrian.rolap.RolapConnection;
-
 
 public class OlapQuery implements IQuery {
 
-    private static final Logger log = LoggerFactory.getLogger(OlapQuery.class);
+    private static final Logger log = LogManager.getLogger(OlapQuery.class);
 
     private static final String SCENARIO = "Scenario";
 

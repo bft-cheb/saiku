@@ -2,6 +2,8 @@ package org.saiku.olap.query2.util;
 
 import mondrian.olap4j.SaikuMondrianHelper;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.Axis;
 import org.olap4j.OlapException;
 import org.olap4j.impl.IdentifierParser;
@@ -55,6 +57,8 @@ import java.util.Set;
 
 public class Fat {
 
+  private static Logger log = LogManager.getLogger(Fat.class);
+
   public static Query convert(ThinQuery tq, Cube cube) throws SQLException {
 
     Query q = new Query(tq.getName(), cube);
@@ -104,7 +108,7 @@ public class Fat {
 	    parent =
 	      q.getCube().lookupMember(IdentifierParser.parseIdentifier(qcm.getParentMember()));
 	  } catch (OlapException e) {
-	    e.printStackTrace();
+	    log.error("lookup member error", e);
 	  }
 
 	}

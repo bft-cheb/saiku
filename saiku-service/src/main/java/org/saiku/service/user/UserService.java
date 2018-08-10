@@ -1,13 +1,12 @@
 package org.saiku.service.user;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.database.JdbcUserDAO;
 import org.saiku.database.dto.SaikuUser;
 import org.saiku.service.ISessionService;
 import org.saiku.service.datasource.DatasourceService;
 import org.saiku.service.datasource.IDatasourceManager;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class UserService implements IUserManager, Serializable {
     private DatasourceService datasourceService;
     private ISessionService sessionService;
     private List<String> adminRoles;
-    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+    private static final Logger log = LogManager.getLogger(UserService.class);
 
     public void setAdminRoles( List<String> adminRoles ) {
         this.adminRoles = adminRoles;

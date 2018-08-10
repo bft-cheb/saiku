@@ -16,29 +16,32 @@
 
 package org.saiku.olap.util;
 
-import org.saiku.datasources.connection.IConnectionManager;
-import org.saiku.olap.util.exception.SaikuOlapException;
-
-import org.olap4j.OlapConnection;
-import org.olap4j.OlapException;
-import org.olap4j.impl.Olap4jUtil;
-import org.olap4j.metadata.Database;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-
-import java.sql.SQLException;
-import java.util.*;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
 import mondrian.xmla.XmlaHandler;
 import mondrian.xmla.XmlaHandler.ConnectionFactory;
 import mondrian.xmla.XmlaHandler.Request;
 import mondrian.xmla.XmlaHandler.XmlaExtra;
 import mondrian.xmla.XmlaRequest;
 import mondrian.xmla.impl.Olap4jXmlaServlet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.olap4j.OlapConnection;
+import org.olap4j.OlapException;
+import org.olap4j.impl.Olap4jUtil;
+import org.olap4j.metadata.Database;
+import org.saiku.datasources.connection.IConnectionManager;
+import org.saiku.olap.util.exception.SaikuOlapException;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by bugg on 30/03/15.
@@ -46,6 +49,7 @@ import mondrian.xmla.impl.Olap4jXmlaServlet;
 public class SaikuXmlaServlet extends Olap4jXmlaServlet {
 
   private static IConnectionManager connections;
+  private Logger log = LogManager.getLogger(SaikuXmlaServlet.class);
 
 
   public SaikuXmlaServlet() {
@@ -90,7 +94,7 @@ public class SaikuXmlaServlet extends Olap4jXmlaServlet {
 
 
         } catch (SaikuOlapException e) {
-          e.printStackTrace();
+          log.error("olap error", e);
         }
         return null;
       }
@@ -145,6 +149,8 @@ public class SaikuXmlaServlet extends Olap4jXmlaServlet {
 
   private static class SaikuXmlaExtraImpl extends XmlaHandler.XmlaExtraImpl {
 
+    private Logger log = LogManager.getLogger(SaikuXmlaExtraImpl.class);
+
     @Override
       public List<Map<String, Object>> getDataSources(
           OlapConnection connection) throws OlapException
@@ -171,7 +177,7 @@ public class SaikuXmlaServlet extends Olap4jXmlaServlet {
 
           return lret;
         } catch (SaikuOlapException e) {
-          e.printStackTrace();
+          log.error("olap error", e);
         }
 
 return null;

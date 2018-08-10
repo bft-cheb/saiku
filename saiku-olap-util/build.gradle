@@ -1,4 +1,5 @@
-def slf4jVersion = '1.7.9'
+apply plugin: 'project-report'
+
 def mondrianVersion = '4.3.1.0-169'
 def olap4jVersion = '1.2.0'
 
@@ -15,8 +16,6 @@ publishing {
 }
 
 dependencies {
-  compile group: 'log4j', name: 'log4j', version: '1.2.16'
-
   compile group: 'org.apache.commons', name: 'commons-math', version: '2.2'
 
   compile(group: 'org.olap4j', name: 'olap4j', version: olap4jVersion) {
@@ -24,13 +23,22 @@ dependencies {
     exclude group: 'asm', module: 'asm-commons'
     exclude group: 'retroweaver', module: 'retroweaver'
     exclude group: 'retroweaver', module: 'retroweaver-rt'
+    exclude group: 'xerces'
   }
   compile(group: 'pentaho', name: 'mondrian', version: mondrianVersion) {
     exclude group: 'javax.servlet', module: 'jsp-api'
     exclude group: 'log4j', module: 'log4j'
+    exclude group: 'xerces', module: 'xerces'
+    exclude group: 'xerces', module: 'xercesImpl'
   }
-  compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+
   compile 'eigenbase:eigenbase-properties:1.1.0.10924'
   compile 'eigenbase:eigenbase-resgen:1.3.0.11873'
   compile 'eigenbase:eigenbase-xom:1.3.0.11999'
+
+  compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
+  compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
+  compile group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.10.0'
+
+  compile group: 'org.opengis.cite.xerces', name: 'xercesImpl-xsd11', version: '2.12-beta-r1667115'
 }

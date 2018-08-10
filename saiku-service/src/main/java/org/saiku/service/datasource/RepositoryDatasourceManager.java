@@ -17,36 +17,39 @@
 package org.saiku.service.datasource;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.database.dto.MondrianSchema;
 import org.saiku.datasources.connection.IConnectionManager;
 import org.saiku.datasources.connection.RepositoryFile;
 import org.saiku.datasources.datasource.SaikuDatasource;
-import org.saiku.repository.*;
+import org.saiku.repository.AclEntry;
+import org.saiku.repository.ClassPathRepositoryManager;
+import org.saiku.repository.DataSource;
+import org.saiku.repository.IRepositoryManager;
+import org.saiku.repository.IRepositoryObject;
+import org.saiku.repository.JackRabbitRepositoryManager;
+import org.saiku.repository.ScopedRepo;
 import org.saiku.service.importer.LegacyImporter;
 import org.saiku.service.importer.LegacyImporterImpl;
 import org.saiku.service.user.UserService;
-import org.saiku.service.util.exception.SaikuServiceException;
-
 import org.saiku.service.util.security.authentication.PasswordProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.jcr.PathNotFoundException;
+import javax.jcr.RepositoryException;
+import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
-
-import javax.jcr.PathNotFoundException;
-import javax.jcr.RepositoryException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * A Datasource Manager for the Saiku Repository API layer.
@@ -66,7 +69,7 @@ public class RepositoryDatasourceManager implements IDatasourceManager {
     }
 
     private UserService userService;
-    private static final Logger log = LoggerFactory.getLogger(RepositoryDatasourceManager.class);
+    private static final Logger log = LogManager.getLogger(RepositoryDatasourceManager.class);
     private String configurationpath;
     private String datadir;
     private IRepositoryManager irm;
@@ -491,7 +494,7 @@ public class RepositoryDatasourceManager implements IDatasourceManager {
             irm.saveInternalFile(content, path, type);
             return "Save Okay";
         } catch (RepositoryException e) {
-            e.printStackTrace();
+            log.error("save file error", e);
             return "Save Failed: " + e.getLocalizedMessage();
         }
     }
@@ -501,7 +504,7 @@ public class RepositoryDatasourceManager implements IDatasourceManager {
             irm.saveBinaryInternalFile(content, path, type);
             return "Save Okay";
         } catch (RepositoryException e) {
-            e.printStackTrace();
+            log.error("save file error", e);
             return "Save Failed: " + e.getLocalizedMessage();
         }
     }
@@ -510,8 +513,7 @@ public class RepositoryDatasourceManager implements IDatasourceManager {
         try {
             irm.removeInternalFile(filePath);
         } catch (RepositoryException e) {
-            log.error("Remove file failed: " + filePath);
-            e.printStackTrace();
+            log.error("Remove file failed: " + filePath, e);
         }
     }
 

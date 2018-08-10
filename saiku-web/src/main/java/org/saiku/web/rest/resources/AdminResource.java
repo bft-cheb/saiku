@@ -15,6 +15,12 @@
  */
 package org.saiku.web.rest.resources;
 
+import com.qmino.miredot.annotations.ReturnType;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.database.dto.MondrianSchema;
 import org.saiku.database.dto.SaikuUser;
 import org.saiku.datasources.datasource.SaikuDatasource;
@@ -26,26 +32,30 @@ import org.saiku.service.user.UserService;
 import org.saiku.service.util.exception.SaikuDataSourceException;
 import org.saiku.service.util.exception.SaikuServiceException;
 import org.saiku.web.rest.objects.DataSourceMapper;
-
-import com.qmino.miredot.annotations.ReturnType;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataParam;
-
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-
 import javax.jcr.RepositoryException;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * AdminResource for the Saiku 3.0+ Admin console
@@ -57,7 +67,7 @@ public class AdminResource {
     private DatasourceService datasourceService;
 
     private UserService userService;
-    private static final Logger log = LoggerFactory.getLogger(DataSourceResource.class);
+    private static final Logger log = LogManager.getLogger(DataSourceResource.class);
     private OlapDiscoverService olapDiscoverService;
     private LogExtractor logExtractor;
 

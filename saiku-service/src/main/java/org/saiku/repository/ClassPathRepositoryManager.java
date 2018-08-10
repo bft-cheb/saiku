@@ -16,18 +16,22 @@
 package org.saiku.repository;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.database.dto.MondrianSchema;
 import org.saiku.datasources.connection.RepositoryFile;
 import org.saiku.service.user.UserService;
 import org.saiku.service.util.exception.SaikuServiceException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import javax.jcr.RepositoryException;
+import javax.servlet.http.HttpSession;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,21 +44,20 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-
-import javax.jcr.RepositoryException;
-import javax.servlet.http.HttpSession;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * Classpath Repository Manager for Saiku.
  */
 public class ClassPathRepositoryManager implements IRepositoryManager {
     private static final String ORBIS_WORKSPACE_DIR = "workspace";
-    private static final Logger log = LoggerFactory.getLogger(ClassPathRepositoryManager.class);
+    private static final Logger log = LogManager.getLogger(ClassPathRepositoryManager.class);
 
     private static ClassPathRepositoryManager ref;
     private final String defaultRole;
@@ -314,7 +317,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
                 fileWriter.flush();
                 fileWriter.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("save file error", e);
             }
 
             return resNode;
@@ -378,7 +381,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
                 fileWriter.flush();
                 fileWriter.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("save file error", e);
             }
 
 
@@ -412,7 +415,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
             try {
                 outputStream = new FileOutputStream(new File(filename));
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                log.error("file not found", e);
             }
 
             int read;
@@ -425,11 +428,11 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
                             outputStream.write(bytes, 0, read);
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        log.error("save file error", e);
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("save file error", e);
             }
 
             return resNode;
@@ -448,12 +451,12 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
         try {
             encoded = Files.readAllBytes(Paths.get(getDatadir() + sep + s));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("error", e);
         }
         try {
             return new String(encoded, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("read file error", e);
         }
         return null;
 
@@ -490,7 +493,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
             byte[] f = Files.readAllBytes(path);
             return new ByteArrayInputStream(f);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("save file error", e);
         }
         return null;
     }
@@ -539,7 +542,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
         try {
             return getRepoObjects(this.getFolder("/"), type, username, roles, false);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("get file error", e);
         }
         return null;
     }
@@ -552,7 +555,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
             try {
                 return getRepoObjects(this.getFolder(path), type, username, roles, true);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("error", e);
             }
         }
 
@@ -696,7 +699,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
             try {
                 stream = (FileUtils.openInputStream(file));
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("open stream file error", e);
             }
             DataSource d = null;
             try {
@@ -752,7 +755,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
             fileWriter.flush();
             fileWriter.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("save file error", e);
         }
 
     }
@@ -770,7 +773,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
         try {
             n = getFolder(fileUrl);
         } catch (RepositoryException e) {
-            e.printStackTrace();
+            log.error("read file error", e);
         }
 
         return new RepositoryFile(n != null ? n.getName() : null, null, null, fileUrl);
@@ -926,7 +929,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
         try {
             return sessionRegistry.getSession();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("error", e);
         }
 
         return null;
@@ -964,7 +967,7 @@ public class ClassPathRepositoryManager implements IRepositoryManager {
             try {
                 this.start(userService);
             } catch (RepositoryException e) {
-                e.printStackTrace();
+                log.error("get file folder error", e);
             }
         }
         return append + "unknown/";

@@ -15,6 +15,26 @@
  */
 package org.saiku.web.rest.resources;
 
+import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs.FileSystemManager;
+import org.apache.commons.vfs.VFS;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.saiku.service.olap.OlapQueryService;
+import org.saiku.web.rest.objects.SavedQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response.Status;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -27,27 +47,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
-import org.apache.commons.vfs.FileObject;
-import org.apache.commons.vfs.FileSystemManager;
-import org.apache.commons.vfs.VFS;
-import org.saiku.service.olap.OlapQueryService;
-import org.saiku.web.rest.objects.SavedQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 /**
  * QueryServlet contains all the methods required when manipulating an OLAP Query.
  * @author Paul Stoellberger
@@ -58,7 +57,7 @@ import org.springframework.stereotype.Component;
 @XmlAccessorType(XmlAccessType.NONE)
 public class BasicRepositoryResource {
 
-	private static final Logger log = LoggerFactory.getLogger(BasicRepositoryResource.class);
+	private static final Logger log = LogManager.getLogger(BasicRepositoryResource.class);
 
 	private OlapQueryService olapQueryService;
 
@@ -82,7 +81,7 @@ public class BasicRepositoryResource {
 			}
 			repo = fileObject;
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("path get error", e);
 		}
 
 	}
@@ -128,7 +127,6 @@ public class BasicRepositoryResource {
 			}
 		} catch (Exception e) {
 			log.error(this.getClass().getName(),e);
-			e.printStackTrace();
 		}
 		Collections.sort(queries);
 		return queries;

@@ -18,6 +18,8 @@ package org.saiku.olap.discover;
 import mondrian.olap4j.SaikuMondrianHelper;
 import mondrian.rolap.RolapConnection;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.OlapConnection;
 import org.olap4j.OlapDatabaseMetaData;
 import org.olap4j.OlapException;
@@ -48,8 +50,6 @@ import org.saiku.olap.util.SaikuDimensionCaptionComparator;
 import org.saiku.olap.util.SaikuProperties;
 import org.saiku.olap.util.exception.SaikuOlapException;
 import org.saiku.service.util.MondrianDictionary;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +59,7 @@ import java.util.List;
 
 public class OlapMetaExplorer {
 
-	private static final Logger log = LoggerFactory.getLogger(OlapMetaExplorer.class);
+	private static final Logger log = LogManager.getLogger(OlapMetaExplorer.class);
 
 	private final IConnectionManager connections;
 

@@ -1,5 +1,7 @@
 package org.saiku.query;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.OlapConnection;
 import org.olap4j.OlapWrapper;
 
@@ -16,8 +18,9 @@ public class TestContext {
 
 	private static TestContext instance;
 	public static boolean DEBUG = false;
+  private Logger log = LogManager.getLogger(TestContext.class);
 
-	public TestContext() {
+  public TestContext() {
 		loadProperties();
 	}
 
@@ -42,7 +45,7 @@ public class TestContext {
 			return tmpolapConnection;
 
 		} catch (Exception e) {
-			e.printStackTrace();
+		  log.error("error", e);
 		}
 		return null;
 

@@ -22,6 +22,8 @@ import com.qmino.miredot.annotations.ReturnType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.saiku.olap.dto.SimpleCubeElement;
 import org.saiku.olap.dto.resultset.CellDataSet;
 import org.saiku.olap.query2.ThinQuery;
@@ -33,8 +35,6 @@ import org.saiku.web.export.JSConverter;
 import org.saiku.web.export.PdfReport;
 import org.saiku.web.rest.objects.resultset.QueryResult;
 import org.saiku.web.rest.util.RestUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.mail.internet.MimeUtility;
@@ -73,7 +73,7 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.NONE)
 public class Query2Resource {
 
-    private static final Logger log = LoggerFactory.getLogger(Query2Resource.class);
+    private static final Logger log = LogManager.getLogger(Query2Resource.class);
 
     private ThinQueryService thinQueryService;
 

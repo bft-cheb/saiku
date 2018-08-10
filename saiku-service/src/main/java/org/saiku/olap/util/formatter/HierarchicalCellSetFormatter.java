@@ -15,13 +15,14 @@
  */
 package org.saiku.olap.util.formatter;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.Cell;
 import org.olap4j.CellSet;
 import org.olap4j.CellSetAxis;
 import org.olap4j.Position;
 import org.olap4j.impl.CoordinateIterator;
 import org.olap4j.impl.Olap4jUtil;
-import org.olap4j.metadata.Dimension;
 import org.olap4j.metadata.Hierarchy;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Member;
@@ -30,16 +31,20 @@ import org.saiku.olap.dto.resultset.DataCell;
 import org.saiku.olap.dto.resultset.Matrix;
 import org.saiku.olap.dto.resultset.MemberCell;
 import org.saiku.olap.util.SaikuProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class HierarchicalCellSetFormatter implements ICellSetFormatter {
 
-    private static final Logger log = LoggerFactory.getLogger(HierarchicalCellSetFormatter.class);
+    private static final Logger log = LogManager.getLogger(HierarchicalCellSetFormatter.class);
 
     /**
    * Description of an axis.

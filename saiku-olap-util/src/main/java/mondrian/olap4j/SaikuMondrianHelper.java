@@ -15,14 +15,33 @@
  */
 package mondrian.olap4j;
 
-import org.olap4j.*;
+import mondrian.olap.Annotation;
+import mondrian.olap.DrillThrough;
+import mondrian.olap.MondrianServer;
+import mondrian.olap.OlapElement;
+import mondrian.olap.QueryPart;
+import mondrian.olap.Role;
+import mondrian.olap.RoleImpl;
+import mondrian.olap.Schema;
+import mondrian.olap.Util;
+import mondrian.rolap.DimensionLookup;
+import mondrian.rolap.RolapBaseCubeMeasure;
+import mondrian.rolap.RolapConnection;
+import mondrian.rolap.RolapCubeDimension;
+import mondrian.rolap.RolapCubeLevel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.olap4j.CellSet;
+import org.olap4j.CellSetAxis;
+import org.olap4j.OlapConnection;
+import org.olap4j.OlapException;
+import org.olap4j.OlapStatement;
 import org.olap4j.Position;
 import org.olap4j.metadata.Level;
 import org.olap4j.metadata.Measure;
 import org.olap4j.metadata.MetadataElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,15 +51,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
-import mondrian.olap.*;
-import mondrian.rolap.*;
-
 public class SaikuMondrianHelper {
 	
 	
-	private static final Logger log = LoggerFactory.getLogger(SaikuMondrianHelper.class);
+	private static final Logger log = LogManager.getLogger(SaikuMondrianHelper.class);
 
 	private static RolapConnection getMondrianConnection(OlapConnection con) {
 		try {
@@ -49,7 +63,7 @@ public class SaikuMondrianHelper {
             }
             return con.unwrap(RolapConnection.class);
         } catch (SQLException e) {
-			e.printStackTrace();
+		  log.error("sql error", e);
 		}
 		return null;
 	}
@@ -63,7 +77,7 @@ public class SaikuMondrianHelper {
         try {
             return con.isWrapperFor(RolapConnection.class);
         } catch (SQLException e) {
-            e.printStackTrace();
+	  log.error("sql error", e);
         }
         return false;
     }
@@ -180,7 +194,7 @@ public class SaikuMondrianHelper {
 	try {
 	  statement = con.createStatement();
 	} catch (OlapException e) {
-	  e.printStackTrace();
+	  log.error("error", e);
 	}
 	try {
 	  String l = null;
@@ -210,7 +224,7 @@ public class SaikuMondrianHelper {
 		           }
 	  return members;
 	} catch (OlapException e) {
-	  e.printStackTrace();
+	  log.error("olap error", e);
 	}
 return null;
   }

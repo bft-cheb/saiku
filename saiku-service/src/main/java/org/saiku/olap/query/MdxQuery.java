@@ -16,12 +16,9 @@
 
 package org.saiku.olap.query;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
-
 import mondrian.rolap.RolapConnection;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.Axis;
 import org.olap4j.CellSet;
 import org.olap4j.OlapConnection;
@@ -44,13 +41,15 @@ import org.saiku.olap.dto.SaikuTag;
 import org.saiku.olap.dto.filter.SaikuFilter;
 import org.saiku.olap.util.exception.SaikuOlapException;
 import org.saiku.olap.util.formatter.ICellSetFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
 
 
 public class MdxQuery implements IQuery {
 
-  private static final Logger log = LoggerFactory.getLogger(MdxQuery.class);
+  private static final Logger log = LogManager.getLogger(MdxQuery.class);
 
   private final Properties properties = new Properties();
   private String mdx;
@@ -217,7 +216,7 @@ public class MdxQuery implements IQuery {
         }
       }
     } catch (OlapException e) {
-      e.printStackTrace();
+        log.error("get cube error", e);
     }
 
 

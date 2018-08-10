@@ -15,22 +15,19 @@
  */
 package org.saiku.datasources.connection;
 
+import mondrian.rolap.RolapConnection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.olap4j.OlapConnection;
 import org.olap4j.OlapWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
 
-import mondrian.rolap.RolapConnection;
-
 import static org.saiku.datasources.connection.encrypt.CryptoUtil.decrypt;
 
 public class SaikuOlapConnection implements ISaikuConnection {
-
-
     private String name;
     private boolean initialized = false;
     private Properties properties;
@@ -39,7 +36,7 @@ public class SaikuOlapConnection implements ISaikuConnection {
     private String password;
     private String passwordenc;
 
-    private static final Logger log = LoggerFactory.getLogger(SaikuOlapConnection.class);
+    private static final Logger log = LogManager.getLogger(SaikuOlapConnection.class);
 
 
     public SaikuOlapConnection(String name, Properties props) {
@@ -114,7 +111,7 @@ public class SaikuOlapConnection implements ISaikuConnection {
                         throw new Exception("Connection is null");
                     }
 
-                    log.info("Catalogs:" + tmpolapConnection.getOlapCatalogs().size());
+//                    log.info("Catalogs:" + tmpolapConnection.getOlapCatalogs().size());
                     olapConnection = tmpolapConnection;
                     initialized = true;
                     return true;
@@ -133,7 +130,6 @@ public class SaikuOlapConnection implements ISaikuConnection {
             log.info("Clearing cache");
             RolapConnection rcon = olapConnection.unwrap(RolapConnection.class);
             rcon.getCacheControl(null).flushSchemaCache();
-
         }
         return true;
     }
@@ -153,6 +149,7 @@ public class SaikuOlapConnection implements ISaikuConnection {
                 connect();
             }
         } catch (Exception e) {
+            log.error("connect error", e);
         }
         return olapConnection;
     }
