@@ -16,52 +16,28 @@
 package org.saiku.service.olap;
 
 import mondrian.olap4j.SaikuMondrianHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.olap4j.Axis;
-import org.olap4j.CellSet;
-import org.olap4j.CellSetAxis;
-import org.olap4j.OlapConnection;
-import org.olap4j.OlapStatement;
-import org.olap4j.Position;
+import org.olap4j.*;
 import org.olap4j.mdx.ParseTreeNode;
 import org.olap4j.mdx.ParseTreeWriter;
 import org.olap4j.mdx.SelectNode;
 import org.olap4j.mdx.parser.impl.DefaultMdxParserImpl;
-import org.olap4j.metadata.Cube;
-import org.olap4j.metadata.Dimension;
-import org.olap4j.metadata.Hierarchy;
-import org.olap4j.metadata.Level;
-import org.olap4j.metadata.Measure;
-import org.olap4j.metadata.Member;
-import org.saiku.olap.dto.SaikuCube;
-import org.saiku.olap.dto.SaikuHierarchy;
-import org.saiku.olap.dto.SaikuLevel;
-import org.saiku.olap.dto.SaikuMember;
-import org.saiku.olap.dto.SimpleCubeElement;
+import org.olap4j.metadata.*;
+import org.saiku.olap.dto.*;
 import org.saiku.olap.dto.resultset.AbstractBaseCell;
 import org.saiku.olap.dto.resultset.CellDataSet;
 import org.saiku.olap.query.IQuery;
 import org.saiku.olap.query.IQuery.QueryType;
 import org.saiku.olap.query.OlapQuery;
 import org.saiku.olap.query.QueryDeserializer;
-import org.saiku.olap.query2.ThinAxis;
-import org.saiku.olap.query2.ThinCalculatedMember;
-import org.saiku.olap.query2.ThinHierarchy;
-import org.saiku.olap.query2.ThinLevel;
-import org.saiku.olap.query2.ThinMeasure;
-import org.saiku.olap.query2.ThinMember;
-import org.saiku.olap.query2.ThinQuery;
-import org.saiku.olap.query2.ThinQueryModel;
+import org.saiku.olap.query2.*;
 import org.saiku.olap.query2.ThinQueryModel.AxisLocation;
 import org.saiku.olap.query2.util.Fat;
 import org.saiku.olap.query2.util.Thin;
-import org.saiku.olap.util.ObjectUtil;
-import org.saiku.olap.util.OlapResultSetUtil;
-import org.saiku.olap.util.QueryConverter;
-import org.saiku.olap.util.SaikuProperties;
-import org.saiku.olap.util.SaikuUniqueNameComparator;
+import org.saiku.olap.util.*;
 import org.saiku.olap.util.formatter.CellSetFormatterFactory;
 import org.saiku.olap.util.formatter.FlattenedCellSetFormatter;
 import org.saiku.olap.util.formatter.ICellSetFormatter;
@@ -70,11 +46,7 @@ import org.saiku.query.QueryDetails;
 import org.saiku.query.QueryHierarchy;
 import org.saiku.query.QueryLevel;
 import org.saiku.query.util.QueryUtil;
-import org.saiku.service.olap.drillthrough.DimensionResultInfo;
-import org.saiku.service.olap.drillthrough.DrillThroughResult;
-import org.saiku.service.olap.drillthrough.DrillthroughUtils;
-import org.saiku.service.olap.drillthrough.MeasureResultInfo;
-import org.saiku.service.olap.drillthrough.ResultInfo;
+import org.saiku.service.olap.drillthrough.*;
 import org.saiku.service.olap.totals.AxisInfo;
 import org.saiku.service.olap.totals.TotalNode;
 import org.saiku.service.olap.totals.TotalsListsBuilder;
@@ -94,16 +66,9 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class ThinQueryService implements Serializable {
 
@@ -730,13 +695,14 @@ public class ThinQueryService implements Serializable {
             Query query = Fat.convert(tq, cub);
 
             QueryDetails details = query.getDetails();
-            Measure[] selectedMeasures = new Measure[details.getMeasures().size()];
 
-            for (int i = 0; i < selectedMeasures.length; i++) {
-                selectedMeasures[i] = details.getMeasures().get(i);
-            }
+            List<String> findMeasureList = findVisibleMeasures(cellSet);
+            List<Measure> filteredMeasures = details.getMeasures().stream()
+              .filter(selectedMeasure -> findMeasureList.contains(selectedMeasure.getUniqueName()))
+              .collect(Collectors.toList());
 
-            result.setSelectedMeasures(selectedMeasures);
+            Measure[] filteredMeasuresArray = filteredMeasures.toArray(new Measure[filteredMeasures.size()]);
+            result.setSelectedMeasures(filteredMeasuresArray);
 
             int rowsIndex = 0;
             if (!cellSet.getAxes().get(0).getAxisOrdinal().equals(Axis.ROWS)) {
@@ -763,7 +729,7 @@ public class ThinQueryService implements Serializable {
                 List<String> aggs = query.getAggregators(axisInfos[second].axis.getAxisOrdinal().name());
                 String totalFunctionName = aggs != null && aggs.size() > 0 ? aggs.get(0) : null;
                 aggregators[0] = TotalAggregator.newInstanceByFunctionName(totalFunctionName);
-                builder = new TotalsListsBuilder(selectedMeasures, aggregators, cellSet, axisInfos[index], axisInfos[second], tq);
+                builder = new TotalsListsBuilder(filteredMeasuresArray, aggregators, cellSet, axisInfos[index], axisInfos[second], tq);
                 totals[index] = builder.buildTotalsLists();
             }
 
@@ -945,4 +911,34 @@ public class ThinQueryService implements Serializable {
         return null;
 
     }
+
+    /**
+     * Отфильтровывает список мер, в зависимости от режима Отображать/Не отображать пустые значения
+     *
+     * @param cellSet набор значений по строкам и столбцам
+     * @return список мер
+     */
+    private List<String> findVisibleMeasures(CellSet cellSet) {
+        List<String> measureNameList = new ArrayList<>();
+        if (cellSet == null) {
+            return measureNameList;
+        }
+
+        if (CollectionUtils.isNotEmpty(cellSet.getAxes())) {
+            cellSet.getAxes().stream()
+              .filter(cellSetAxis -> CollectionUtils.isNotEmpty(cellSetAxis.getPositions()))
+              .forEach(cellSetAxis -> {
+                cellSetAxis.getPositions().stream()
+                  .filter(position -> CollectionUtils.isNotEmpty(position.getMembers()))
+                  .forEach(position -> {
+                      measureNameList.addAll(position.getMembers().stream()
+                        .filter(member -> Member.Type.MEASURE.equals(member.getMemberType()))
+                        .map(Member::getUniqueName)
+                        .collect(Collectors.toList()));
+                  });
+            });
+        }
+        return measureNameList;
+    }
+
 }

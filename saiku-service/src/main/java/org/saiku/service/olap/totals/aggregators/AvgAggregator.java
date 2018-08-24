@@ -63,7 +63,7 @@ public class AvgAggregator extends TotalAggregator {
       } catch ( OlapException e ) {
         throw new RuntimeException( e );
       }
-      if ( count.longValue() > -1 ) {
+      if ( count != null && count.longValue() > -1 ) {
         this.count += count.longValue();
         accumulator += doubleVal * count.doubleValue();
       } else {

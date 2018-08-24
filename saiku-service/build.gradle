@@ -16,7 +16,7 @@ dependencies {
   compile projectSaiku(':saiku-olap-util')
   compile projectSaiku(':saiku-query')
 
-  compile 'org.apache.poi:poi-ooxml:3.7'
+  compile 'org.apache.poi:poi-ooxml:3.12'
   compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
   compile ('org.olap4j:olap4j-xmla:1.2.0'){
     exclude group: 'xerces', module: 'xercesImpl'
