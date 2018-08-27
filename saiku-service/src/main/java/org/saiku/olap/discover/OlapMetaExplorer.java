@@ -25,25 +25,9 @@ import org.olap4j.OlapDatabaseMetaData;
 import org.olap4j.OlapException;
 import org.olap4j.mdx.IdentifierNode;
 import org.olap4j.mdx.IdentifierSegment;
-import org.olap4j.metadata.Catalog;
-import org.olap4j.metadata.Cube;
-import org.olap4j.metadata.Database;
-import org.olap4j.metadata.Dimension;
-import org.olap4j.metadata.Hierarchy;
-import org.olap4j.metadata.Level;
-import org.olap4j.metadata.Measure;
-import org.olap4j.metadata.Member;
-import org.olap4j.metadata.Schema;
+import org.olap4j.metadata.*;
 import org.saiku.datasources.connection.IConnectionManager;
-import org.saiku.olap.dto.SaikuCatalog;
-import org.saiku.olap.dto.SaikuConnection;
-import org.saiku.olap.dto.SaikuCube;
-import org.saiku.olap.dto.SaikuDimension;
-import org.saiku.olap.dto.SaikuHierarchy;
-import org.saiku.olap.dto.SaikuLevel;
-import org.saiku.olap.dto.SaikuMember;
-import org.saiku.olap.dto.SaikuSchema;
-import org.saiku.olap.dto.SimpleCubeElement;
+import org.saiku.olap.dto.*;
 import org.saiku.olap.util.ObjectUtil;
 import org.saiku.olap.util.SaikuCubeCaptionComparator;
 import org.saiku.olap.util.SaikuDimensionCaptionComparator;
@@ -137,6 +121,7 @@ public class OlapMetaExplorer {
 	      resolveConnection = getConnection(connectionName);
 	    } catch (Exception ex) {
 	      log.warn("connection " + connectionName + " is not online: " + ex.getLocalizedMessage());
+	      log.debug(ex);
 	    } finally {
 	      if (resolveConnection != null) {
 		cubesList.add(resolveConnection);

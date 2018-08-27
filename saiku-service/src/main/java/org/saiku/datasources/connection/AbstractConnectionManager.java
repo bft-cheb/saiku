@@ -154,9 +154,14 @@ public abstract class AbstractConnectionManager implements IConnectionManager, S
   public Map<String, ISaikuConnection> getAllConnections() throws SaikuOlapException {
     Map<String, ISaikuConnection> resultDs = new HashMap<>();
     for ( String name : ds.getDatasources().keySet() ) {
-      ISaikuConnection con = getConnection( name );
-      if ( con != null ) {
-        resultDs.put( name, con );
+      try {
+        ISaikuConnection con = getConnection(name);
+        if ( con != null ) {
+          resultDs.put( name, con );
+        }
+      } catch (Exception ex) {
+        log.warn("connection check error: " + ex.getLocalizedMessage());
+        log.debug(ex);
       }
     }
     return resultDs;
