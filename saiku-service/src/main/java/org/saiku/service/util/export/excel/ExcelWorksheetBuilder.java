@@ -1,5 +1,6 @@
 package org.saiku.service.util.export.excel;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,6 +56,7 @@ public class ExcelWorksheetBuilder {
     private static final short BASIC_SHEET_FONT_SIZE = 11;
     private static final String EMPTY_STRING = "";
     private static final String CSS_COLORS_CODE_PROPERTIES = "css-colors-codes.properties";
+    private static final int MAX_CHAR_CELL = 150;
 
     private int maxRows = -1;
     private int maxColumns = -1;
@@ -77,6 +79,8 @@ public class ExcelWorksheetBuilder {
     private CellStyle lighterHeaderCellCS;
     private List<ThinHierarchy> queryFilters;
     private Map<String, Integer> colorCodesMap;
+
+    private Map<Integer, Integer> columnWidth = new HashMap<>();
 
     private int nextAvailableColorCode = 41;
     private Properties cssColorCodesProperties;
@@ -205,7 +209,10 @@ public class ExcelWorksheetBuilder {
         int lastHeaderRow = buildExcelTableHeader(startRow);
         Long header = (new Date()).getTime();
         addExcelTableRows(lastHeaderRow);
-        addTotalsSummary(lastHeaderRow);
+        if (SaikuProperties.webExportExcelTotalSummary) {
+            addTotalsSummary(lastHeaderRow);
+        }
+        setColumnWidths();
         Long content = (new Date()).getTime();
         finalizeExcelSheet(startRow);
         Long finalizing = (new Date()).getTime();
@@ -220,6 +227,31 @@ public class ExcelWorksheetBuilder {
             throw new SaikuServiceException("Error creating excel export for query", e);
         }
         return bout.toByteArray();
+    }
+
+    private void setColumnWidths() {
+        if (MapUtils.isNotEmpty(columnWidth)) {
+            for (Map.Entry<Integer, Integer> entry : columnWidth.entrySet()) {
+                workbookSheet.setColumnWidth(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private void registerColumnWidth(Integer aColumnIndex, String aValue) {
+        int width = checkWidthByNumChars(aValue);
+        if (width > 0) {
+            if (columnWidth.get(aColumnIndex) == null) {
+                columnWidth.put(aColumnIndex, width);
+            }
+
+            if (columnWidth.get(aColumnIndex) < width) {
+                columnWidth.put(aColumnIndex, width);
+            }
+        }
+    }
+
+    private Integer checkWidthByNumChars(String aValue) {
+        return StringUtils.isNotBlank(aValue) ? aValue.length() < MAX_CHAR_CELL ? ((int)(aValue.length() * 1.14388)) * 256 : ((int)(MAX_CHAR_CELL * 1.14388)) * 256 : 0;
     }
 
     private void checkRowLimit(int rowIndex) {
@@ -478,8 +510,10 @@ public class ExcelWorksheetBuilder {
                     }
                 }
 
+                registerColumnWidth(column, value);
+
                 //Set column sub totalstotals
-                column = setColTotalAggregationCell(colScanTotals, sheetRow, x, column, true, false);
+                column = setColTotalAggregationCell(colScanTotals, sheetRow, x, column, true, x == 0);
 
                 //Set column grand totals
                 if (y == rowsetBody[x].length - 1) {
@@ -488,7 +522,7 @@ public class ExcelWorksheetBuilder {
             }
 
             // Set row sub totals
-            startingRow = setRowTotalAggregationCell(rowScanTotals, startingRow, x, false);
+            startingRow = setRowTotalAggregationCell(rowScanTotals, startingRow, x, true);
             rowCount = startingRow + x;
         }
 
@@ -608,6 +642,8 @@ public class ExcelWorksheetBuilder {
                         cell.setCellValue(value);
                         cell.setCellStyle(totalsCS);
                         column++;
+
+                        registerColumnWidth(column, value);
                     }
                 }
             }
@@ -625,8 +661,8 @@ public class ExcelWorksheetBuilder {
 
     private void setGrandTotalLabel(Row sheetRow, int y, boolean header) {
         Cell cell = sheetRow.createCell(y);
-        //TODO i18n
-        String value = "Grand Total";
+        //TODO i18n переделать под properties файл
+        String value = "Общий итог";
         if (header) {
             fillHeaderCell(sheetRow, value, y);
         } else {
