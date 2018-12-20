@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -251,7 +250,7 @@ public class ExcelWorksheetBuilder {
     }
 
     private Integer checkWidthByNumChars(String aValue) {
-        return StringUtils.isNotBlank(aValue) ? aValue.length() < MAX_CHAR_CELL ? ((int)(aValue.length() * 1.14388)) * 256 : ((int)(MAX_CHAR_CELL * 1.14388)) * 256 : 0;
+        return StringUtils.isNotBlank(aValue) ? aValue.length() < MAX_CHAR_CELL ? ((int)(aValue.length()*1.4))*256 : ((int)(MAX_CHAR_CELL*1.4))*256 : 0;
     }
 
     private void checkRowLimit(int rowIndex) {
@@ -340,7 +339,7 @@ public class ExcelWorksheetBuilder {
     }
 
     private void finalizeExcelSheet(int startRow) {
-
+/*
         boolean autoSize = (rowsetBody != null && rowsetBody.length > 0 && rowsetBody.length < 10000
           && rowsetHeader != null && rowsetHeader.length > 0 && rowsetHeader[0].length < 200);
 
@@ -361,7 +360,7 @@ public class ExcelWorksheetBuilder {
             }
         }
         Long end = (new Date()).getTime();
-        log.debug("Autosizing: " + (end - start) + "ms");
+        log.debug("Autosizing: " + (end - start) + "ms");*/
         // Freeze the header columns
         int headerWidth = rowsetHeader.length;
         workbookSheet.createFreezePane(0, startRow + headerWidth, 0, startRow + headerWidth);
@@ -600,6 +599,8 @@ public class ExcelWorksheetBuilder {
                         String value = aggregator.getFormattedValue();
                         cell.setCellValue(value);
                         cell.setCellStyle(totalsCS);
+
+                        registerColumnWidth(column-1, value);
                     }
                 }
                 startIndex++;
@@ -641,9 +642,8 @@ public class ExcelWorksheetBuilder {
                         String value = aggregators[x].getFormattedValue();
                         cell.setCellValue(value);
                         cell.setCellStyle(totalsCS);
-                        column++;
-
                         registerColumnWidth(column, value);
+                        column++;
                     }
                 }
             }
@@ -668,6 +668,8 @@ public class ExcelWorksheetBuilder {
         } else {
             cell.setCellValue(value);
             cell.setCellStyle(basicCS);
+
+            registerColumnWidth(y, value);
         }
     }
 
@@ -920,6 +922,8 @@ public class ExcelWorksheetBuilder {
         Cell cell = sheetRow.createCell(y);
         cell.setCellValue(formattedValue);
         cell.setCellStyle(lighterHeaderCellCS);
+
+        registerColumnWidth(y, formattedValue);
     }
 
     /**
