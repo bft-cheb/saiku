@@ -740,6 +740,10 @@ public class ExcelWorksheetBuilder {
             numberCSClone.setFillBackgroundColor(numberCS.getFillBackgroundColor());
         }
 
+        numberCSClone.setBorderTop(CellStyle.BORDER_THIN);
+        numberCSClone.setBorderBottom(CellStyle.BORDER_THIN);
+        ((XSSFCellStyle) numberCSClone).setFillBackgroundColor(new XSSFColor(new java.awt.Color(255, 255, 255)));
+
         cell.setCellStyle(numberCSClone);
     }
 
