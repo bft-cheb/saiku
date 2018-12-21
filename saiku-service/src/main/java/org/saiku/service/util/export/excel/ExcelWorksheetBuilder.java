@@ -138,6 +138,7 @@ public class ExcelWorksheetBuilder {
         basicCS.setFont(font);
         basicCS.setAlignment(CellStyle.ALIGN_LEFT);
         basicCS.setVerticalAlignment(CellStyle.VERTICAL_TOP);
+        basicCS.setWrapText(true); //Set wordwrap
         setCellBordersColor(basicCS);
 
         Font totalsFont = excelWorkbook.createFont();
@@ -175,8 +176,10 @@ public class ExcelWorksheetBuilder {
         lighterHeaderCellCS = excelWorkbook.createCellStyle();
         lighterHeaderCellCS.setFont(headerFont);
         lighterHeaderCellCS.setAlignment(CellStyle.ALIGN_CENTER);
+        lighterHeaderCellCS.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
         lighterHeaderCellCS.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
         lighterHeaderCellCS.setFillPattern(CellStyle.SOLID_FOREGROUND);
+        lighterHeaderCellCS.setWrapText(true);
         setCellBordersColor(lighterHeaderCellCS);
 
         CellStyle darkerHeaderCellCS = excelWorkbook.createCellStyle();
@@ -237,7 +240,11 @@ public class ExcelWorksheetBuilder {
     }
 
     private void registerColumnWidth(Integer aColumnIndex, String aValue) {
-        int width = checkWidthByNumChars(aValue);
+        registerColumnWidth(aColumnIndex, aValue, -1);
+    }
+
+    private void registerColumnWidth(Integer aColumnIndex, String aValue, int aMaxLength) {
+        int width = checkWidthByNumChars(aValue, aMaxLength);
         if (width > 0) {
             if (columnWidth.get(aColumnIndex) == null) {
                 columnWidth.put(aColumnIndex, width);
@@ -249,8 +256,13 @@ public class ExcelWorksheetBuilder {
         }
     }
 
-    private Integer checkWidthByNumChars(String aValue) {
-        return StringUtils.isNotBlank(aValue) ? aValue.length() < MAX_CHAR_CELL ? ((int)(aValue.length()*1.4))*256 : ((int)(MAX_CHAR_CELL*1.4))*256 : 0;
+    private Integer checkWidthByNumChars(String aValue, int aMaxLength) {
+        if (StringUtils.isBlank(aValue)) {
+            return 0;
+        }
+
+        int maxChars = aMaxLength == -1 ? MAX_CHAR_CELL : aMaxLength;
+        return aValue.length() < maxChars ? ((int)(aValue.length()*1.4))*256 : ((int)(maxChars*1.4))*256;
     }
 
     private void checkRowLimit(int rowIndex) {
@@ -266,6 +278,7 @@ public class ExcelWorksheetBuilder {
         // Columns summary
         if (colScanTotals.keySet().size() > 0) {
             Row row = workbookSheet.createRow(rowIndex);
+            row.setHeight((short)-1);
             Cell cell = row.createCell(0);
             cell.setCellStyle(lighterHeaderCellCS);
             cell.setCellValue("Columns");
@@ -283,6 +296,7 @@ public class ExcelWorksheetBuilder {
 
                     TotalAggregator agg = colAggregator[x][0];
                     row = workbookSheet.createRow(rowIndex);
+                    row.setHeight((short)-1);
 
                     // Measure name
                     cell = row.createCell(0);
@@ -303,6 +317,7 @@ public class ExcelWorksheetBuilder {
             checkRowLimit(rowIndex);
 
             Row row = workbookSheet.createRow(rowIndex);
+            row.setHeight((short)-1);
             Cell cell = row.createCell(0);
             cell.setCellStyle(lighterHeaderCellCS);
             cell.setCellValue("Rows");
@@ -321,6 +336,7 @@ public class ExcelWorksheetBuilder {
                         TotalAggregator agg = rowAggregator[x][y];
 
                         row = workbookSheet.createRow(rowIndex);
+                        row.setHeight((short)-1);
 
                         // Measure name
                         cell = row.createCell(0);
@@ -385,6 +401,7 @@ public class ExcelWorksheetBuilder {
         int row = 1;
 
         Row sheetRow = summarySheet.createRow((int) row);
+        sheetRow.setHeight((short)-1);
         Cell cell = sheetRow.createCell(0);
         String todayDate = (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date());
         cell.setCellValue("Export date and time: " + todayDate);
@@ -392,6 +409,7 @@ public class ExcelWorksheetBuilder {
         row = row + 2;
 
         sheetRow = summarySheet.createRow((int) row);
+        sheetRow.setHeight((short)-1);
         cell = sheetRow.createCell(0);
         cell.setCellValue("Dimension");
         cell = sheetRow.createCell(1);
@@ -405,6 +423,7 @@ public class ExcelWorksheetBuilder {
                 for (ThinLevel s : item.getLevels().values()) {
                     for (ThinMember i : s.getSelection().getMembers()) {
                         sheetRow = summarySheet.createRow((short) row);
+                        sheetRow.setHeight((short)-1);
                         cell = sheetRow.createCell(0);
                         cell.setCellValue(item.getCaption());
                         cell = sheetRow.createCell(1);
@@ -425,6 +444,7 @@ public class ExcelWorksheetBuilder {
 
         if (columnCount > maxColumns) {
             sheetRow = summarySheet.createRow((int) row);
+            sheetRow.setHeight((short)-1);
             cell = sheetRow.createCell(0);
             cell.setCellValue("Excel sheet is truncated, only contains " + maxColumns + " columns of " + (columnCount));
             summarySheet.addMergedRegion(new CellRangeAddress(row, row, 0, 10));
@@ -433,6 +453,7 @@ public class ExcelWorksheetBuilder {
 
         if ((headerLength + rowLength) > maxRows) {
             sheetRow = summarySheet.createRow((int) row);
+            sheetRow.setHeight((short)-1);
             cell = sheetRow.createCell(0);
             cell.setCellValue(
               "Excel sheet is truncated, only contains " + maxRows + " rows of " + (headerLength + rowLength));
@@ -443,6 +464,7 @@ public class ExcelWorksheetBuilder {
         row++;
 
         sheetRow = summarySheet.createRow((int) row);
+        sheetRow.setHeight((short)-1);
         cell = sheetRow.createCell(0);
         cell.setCellValue(SaikuProperties.webExportExcelPoweredBy);
         summarySheet.addMergedRegion(new CellRangeAddress(row, row, 0, 10));
@@ -475,6 +497,7 @@ public class ExcelWorksheetBuilder {
 
             int excelRowIndex = x + startingRow;
             sheetRow = workbookSheet.createRow(excelRowIndex);
+            sheetRow.setHeight((short)-1);
 
             int column = 0;
             for (int y = 0; y < maxColumns && y < rowsetBody[x].length; y++) {
@@ -577,6 +600,7 @@ public class ExcelWorksheetBuilder {
             if (aggregatorsTable != null) {
                 //Create totals row
                 Row sheetRow = workbookSheet.createRow(row + 1);
+                sheetRow.setHeight((short)-1);
 
                 //Detect column start index
                 int startColumnIndex = detectColumnStartIndex();
@@ -742,6 +766,8 @@ public class ExcelWorksheetBuilder {
 
         numberCSClone.setBorderTop(CellStyle.BORDER_THIN);
         numberCSClone.setBorderBottom(CellStyle.BORDER_THIN);
+        numberCSClone.setBorderLeft(CellStyle.BORDER_THIN);
+        numberCSClone.setBorderRight(CellStyle.BORDER_THIN);
         ((XSSFCellStyle) numberCSClone).setFillBackgroundColor(new XSSFColor(new java.awt.Color(255, 255, 255)));
 
         cell.setCellStyle(numberCSClone);
@@ -819,6 +845,7 @@ public class ExcelWorksheetBuilder {
         for (x = 0; x < rowsetHeader.length; x++) {
 
             sheetRow = workbookSheet.createRow((int) x + startRow);
+            sheetRow.setHeight((short)-1);
 
             nextHeader = EMPTY_STRING;
             isLastColumn = false;
@@ -923,11 +950,12 @@ public class ExcelWorksheetBuilder {
     }
 
     private void fillHeaderCell(Row sheetRow, String formattedValue, int y) {
+        sheetRow.setHeight((short)-1);
         Cell cell = sheetRow.createCell(y);
         cell.setCellValue(formattedValue);
         cell.setCellStyle(lighterHeaderCellCS);
 
-        registerColumnWidth(y, formattedValue);
+        registerColumnWidth(y, formattedValue, 12);
     }
 
     /**
