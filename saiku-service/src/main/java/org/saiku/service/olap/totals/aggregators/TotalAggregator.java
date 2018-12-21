@@ -89,9 +89,13 @@ public abstract class TotalAggregator {
 
   protected abstract void addData( double data );
 
-  protected abstract Double getValue();
+  public abstract Double getValue();
 
   public abstract TotalAggregator newInstance( Format format, Measure measure );
+
+  public Format getFormat() {
+    return format;
+  }
 
   public String getFormattedValue() {
     if ( formattedValue != null ) {

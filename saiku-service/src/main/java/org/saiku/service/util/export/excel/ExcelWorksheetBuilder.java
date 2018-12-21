@@ -58,7 +58,8 @@ public class ExcelWorksheetBuilder {
     private static final short BASIC_SHEET_FONT_SIZE = 11;
     private static final String EMPTY_STRING = "";
     private static final String CSS_COLORS_CODE_PROPERTIES = "css-colors-codes.properties";
-    private static final int MAX_CHAR_CELL = 150;
+    private static final int MAX_CHAR_CELL = 100;
+    private static final int MIN_CHAR_CELL = 4;
 
     private int maxRows = -1;
     private int maxColumns = -1;
@@ -80,6 +81,7 @@ public class ExcelWorksheetBuilder {
     private CellStyle numberCS;
     private CellStyle lighterHeaderCellCS;
     private Font highLightFont;
+    private Font highLightTotalsFont;
     private List<ThinHierarchy> queryFilters;
     private Map<String, Integer> colorCodesMap;
 
@@ -90,7 +92,6 @@ public class ExcelWorksheetBuilder {
 
     private HSSFPalette customColorsPalette;
     private ExcelBuilderOptions options;
-
 
     public ExcelWorksheetBuilder(CellDataSet table, List<ThinHierarchy> filters, ExcelBuilderOptions options) {
         init(table, filters, options);
@@ -153,6 +154,12 @@ public class ExcelWorksheetBuilder {
         totalsFont.setFontHeightInPoints((short) BASIC_SHEET_FONT_SIZE);
         totalsFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
         totalsFont.setFontName(BASIC_SHEET_FONT_FAMILY);
+
+        highLightTotalsFont = excelWorkbook.createFont();
+        highLightTotalsFont.setFontHeightInPoints((short) BASIC_SHEET_FONT_SIZE);
+        highLightTotalsFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
+        highLightTotalsFont.setFontName(BASIC_SHEET_FONT_FAMILY);
+        ((XSSFFont) highLightTotalsFont).setColor(new XSSFColor(new java.awt.Color(193, 0, 32)));
 
         totalsCS = excelWorkbook.createCellStyle();
         totalsCS.setFont(totalsFont);
@@ -270,7 +277,8 @@ public class ExcelWorksheetBuilder {
         }
 
         int maxChars = aMaxLength == -1 ? MAX_CHAR_CELL : aMaxLength;
-        return aValue.length() < maxChars ? ((int)(aValue.length()*1.4))*256 : ((int)(maxChars*1.4))*256;
+        int charsCount = aValue.length() < MIN_CHAR_CELL ? MIN_CHAR_CELL : aValue.length() < maxChars ? aValue.length() : maxChars;
+        return ((int)(charsCount*1.3))*256;
     }
 
     private void checkRowLimit(int rowIndex) {
@@ -629,11 +637,19 @@ public class ExcelWorksheetBuilder {
 
                         //Create row totals cell
                         Cell cell = sheetRow.createCell(column);
-                        String value = aggregator.getFormattedValue();
+                        Double value = aggregator.getValue();
                         cell.setCellValue(value);
-                        cell.setCellStyle(totalsCS);
 
-                        registerColumnWidth(column-1, value);
+                        String formatString = aggregator.getFormat().getFormatString();
+                        CellStyle totalCSClone = excelWorkbook.createCellStyle();
+                        totalCSClone.cloneStyleFrom(totalsCS);
+                        setDataFormat(totalCSClone, formatString);
+                        cell.setCellStyle(totalCSClone);
+                        if (SaikuProperties.webExportExcelHighlightNegativeNumbers && value < 0) {
+                            totalCSClone.setFont(highLightTotalsFont);
+                        }
+
+                        registerColumnWidth(column-1, String.valueOf(value));
                     }
                 }
                 startIndex++;
@@ -672,10 +688,19 @@ public class ExcelWorksheetBuilder {
 
                     for (TotalAggregator[] aggregators : aggregatorsTable) {
                         Cell cell = sheetRow.createCell(column);
-                        String value = aggregators[x].getFormattedValue();
+                        Double value = aggregators[x].getValue();
                         cell.setCellValue(value);
-                        cell.setCellStyle(totalsCS);
-                        registerColumnWidth(column, value);
+
+                        String formatString = aggregators[x].getFormat().getFormatString();
+                        CellStyle totalCSClone = excelWorkbook.createCellStyle();
+                        totalCSClone.cloneStyleFrom(totalsCS);
+                        setDataFormat(totalCSClone, formatString);
+                        if (SaikuProperties.webExportExcelHighlightNegativeNumbers && value < 0) {
+                            totalCSClone.setFont(highLightTotalsFont);
+                        }
+                        cell.setCellStyle(totalCSClone);
+
+                        registerColumnWidth(column, String.valueOf(value));
                         column++;
                     }
                 }
@@ -683,6 +708,16 @@ public class ExcelWorksheetBuilder {
         }
 
         return column;
+    }
+
+    private void setDataFormat(CellStyle aCSClone, String aFormatString) {
+        try {
+            aFormatString = FormatUtil.getFormatString(aFormatString);
+            DataFormat fmt = excelWorkbook.createDataFormat();
+            short dataFormat = fmt.getFormat(aFormatString);
+            aCSClone.setDataFormat(dataFormat);
+        } catch (Exception ex) {
+        }
     }
 
     private void setGrandTotalLabel(int x, int y, boolean header) {
@@ -725,14 +760,7 @@ public class ExcelWorksheetBuilder {
 
         numberCSClone.cloneStyleFrom(numberCS);
 
-        try {
-            formatString = FormatUtil.getFormatString(formatString);
-            DataFormat fmt = excelWorkbook.createDataFormat();
-            short dataFormat = fmt.getFormat(formatString);
-            numberCSClone.setDataFormat(dataFormat);
-        } catch (Exception ex) {
-
-        }
+        setDataFormat(numberCSClone, formatString);
 
         // Check for cell background
         Map<String, String> properties = dataCell.getProperties();
