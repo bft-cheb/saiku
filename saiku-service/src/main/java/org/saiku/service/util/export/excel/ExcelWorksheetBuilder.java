@@ -277,7 +277,7 @@ public class ExcelWorksheetBuilder {
         }
 
         int maxChars = aMaxLength == -1 ? MAX_CHAR_CELL : aMaxLength;
-        int charsCount = aValue.length() < MIN_CHAR_CELL ? MIN_CHAR_CELL : aValue.length() < maxChars ? aValue.length() : maxChars;
+        int charsCount = aValue.length() < MIN_CHAR_CELL ? MIN_CHAR_CELL : aValue.length() < maxChars ? aValue.length()+1 : maxChars;
         return ((int)(charsCount*1.3))*256;
     }
 
