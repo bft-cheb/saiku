@@ -247,6 +247,7 @@ public class SaikuProperties extends Properties {
     getPropString( "saiku.web.export.excel.numberformat", "#,##0.00" );
   public static final String webExportExcelPoweredBy = getPropString("saiku.web.export.excel.poweredby", "Export made using Saiku OLAP client.");
   public static final Boolean webExportExcelTotalSummary = getPropBoolean("saiku.web.export.excel.totalSummary", "true");
+  public static final Boolean webExportExcelHighlightNegativeNumbers = getPropBoolean("saiku.web.export.excel.highlightNegativeNumbers", "false");
   public static final String formatDefautNumberFormat = getPropString( "saiku.format.numberformat", "#,##0.00" );
   public static final Locale locale = getLocale();
   public static final Boolean olapConvertQuery = getPropBoolean( "saiku.olap.convert.query", "false" );

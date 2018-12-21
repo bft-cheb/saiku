@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.olap4j.metadata.Measure;
 import org.saiku.olap.dto.resultset.AbstractBaseCell;
@@ -51,6 +52,8 @@ import java.util.TreeMap;
 
 public class ExcelWorksheetBuilder {
 
+    private static final Logger log = LogManager.getLogger(ExcelWorksheetBuilder.class);
+
     private static final String BASIC_SHEET_FONT_FAMILY = "Arial";
     private static final short BASIC_SHEET_FONT_SIZE = 11;
     private static final String EMPTY_STRING = "";
@@ -76,6 +79,7 @@ public class ExcelWorksheetBuilder {
     private CellStyle totalsCS;
     private CellStyle numberCS;
     private CellStyle lighterHeaderCellCS;
+    private Font highLightFont;
     private List<ThinHierarchy> queryFilters;
     private Map<String, Integer> colorCodesMap;
 
@@ -87,7 +91,6 @@ public class ExcelWorksheetBuilder {
     private HSSFPalette customColorsPalette;
     private ExcelBuilderOptions options;
 
-    private static final Logger log = LogManager.getLogger(ExcelWorksheetBuilder.class);
 
     public ExcelWorksheetBuilder(CellDataSet table, List<ThinHierarchy> filters, ExcelBuilderOptions options) {
         init(table, filters, options);
@@ -133,6 +136,11 @@ public class ExcelWorksheetBuilder {
         Font font = excelWorkbook.createFont();
         font.setFontHeightInPoints((short) BASIC_SHEET_FONT_SIZE);
         font.setFontName(BASIC_SHEET_FONT_FAMILY);
+
+        highLightFont = excelWorkbook.createFont();
+        highLightFont.setFontHeightInPoints((short) BASIC_SHEET_FONT_SIZE);
+        highLightFont.setFontName(BASIC_SHEET_FONT_FAMILY);
+        ((XSSFFont) highLightFont).setColor(new XSSFColor(new java.awt.Color(193, 0, 32)));
 
         basicCS = excelWorkbook.createCellStyle();
         basicCS.setFont(font);
@@ -528,7 +536,8 @@ public class ExcelWorksheetBuilder {
                     if ((dataCell.getRawNumber() != null) && (formatString != null) && !formatString.trim().isEmpty()) {
                         Number numberValue = dataCell.getRawNumber();
                         cell.setCellValue(numberValue.doubleValue());
-                        applyCellFormatting(cell, dataCell);
+                        applyCellFormatting(cell, dataCell,
+                          SaikuProperties.webExportExcelHighlightNegativeNumbers && numberValue.doubleValue() < 0);
                     }
                 }
 
@@ -700,11 +709,11 @@ public class ExcelWorksheetBuilder {
     /**
      * Apply exact number format to excel Cell from its DataCell. Caller checks
      * the DataCell rawNumber and formatString are correct.
-     *
-     * @param cell The excel cell to apply formatting
+     *  @param cell The excel cell to apply formatting
      * @param dataCell The source
+     * @param aHighLightNegNumber highlight negative numbers
      */
-    private void applyCellFormatting(Cell cell, DataCell dataCell) {
+    private void applyCellFormatting(Cell cell, DataCell dataCell, boolean aHighLightNegNumber) {
         /*
         * Previously, the CellStyles were being kept on a hash map for reuse,
         * but the key used was just the formatString (not considering the
@@ -769,6 +778,10 @@ public class ExcelWorksheetBuilder {
         numberCSClone.setBorderLeft(CellStyle.BORDER_THIN);
         numberCSClone.setBorderRight(CellStyle.BORDER_THIN);
         ((XSSFCellStyle) numberCSClone).setFillBackgroundColor(new XSSFColor(new java.awt.Color(255, 255, 255)));
+
+        if (aHighLightNegNumber) {
+          numberCSClone.setFont(highLightFont);
+        }
 
         cell.setCellStyle(numberCSClone);
     }
