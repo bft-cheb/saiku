@@ -30,6 +30,7 @@ import org.saiku.olap.query2.ThinLevel;
 import org.saiku.olap.query2.ThinMember;
 import org.saiku.olap.util.SaikuProperties;
 import org.saiku.service.olap.totals.TotalNode;
+import org.saiku.service.olap.totals.aggregators.BlankAggregator;
 import org.saiku.service.olap.totals.aggregators.TotalAggregator;
 import org.saiku.service.util.exception.SaikuServiceException;
 
@@ -597,7 +598,7 @@ public class ExcelWorksheetBuilder {
             }
             for (TotalNode n : totalNodes) {
                 TotalAggregator[][] tg = n.getTotalGroups();
-                if (tg.length > 0) {
+                if (availableTotalAgg(tg)) {
                     if (n.getSpan() > n.getWidth()) {
                         index += n.getSpan();
                     } else {
@@ -608,6 +609,20 @@ public class ExcelWorksheetBuilder {
                 }
             }
         }
+    }
+
+    private boolean availableTotalAgg(TotalAggregator[][] aTa) {
+        if (aTa.length == 0) {
+            return false;
+        }
+
+        for (TotalAggregator ta : aTa[0]) {
+            if (!(ta instanceof BlankAggregator)) {
+                 return true;
+            }
+        }
+
+        return false;
     }
 
     private int setRowTotalAggregationCell(Map<Integer, TotalAggregator[][]> scanTotals, int startIndex, int subIndex, boolean grandTotal) {
