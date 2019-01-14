@@ -18,7 +18,7 @@ public class BlankAggregator extends TotalAggregator {
 
   @Override
   public Double getValue() {
-    return 0.0;
+    return null;
   }
 
   @Override

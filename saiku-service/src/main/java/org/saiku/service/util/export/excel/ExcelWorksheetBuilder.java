@@ -69,7 +69,9 @@ public class ExcelWorksheetBuilder {
     private AbstractBaseCell[][] rowsetBody;
 
     private Map<Integer, TotalAggregator[][]> rowScanTotals;
+    private Map<Integer, String[]> rowScanTotalsCaptions;
     private Map<Integer, TotalAggregator[][]> colScanTotals;
+    private Map<Integer, String[]> colScanTotalsCaptions;
 
     private CellDataSet table;
     private Workbook excelWorkbook;
@@ -129,8 +131,10 @@ public class ExcelWorksheetBuilder {
 
         // Row totals and subtotals
         rowScanTotals = new HashMap<>();
+        rowScanTotalsCaptions = new HashMap<>();
         colScanTotals = new HashMap<>();
-        scanRowAndColumnAggregations(table.getRowTotalsLists(), rowScanTotals, table.getColTotalsLists(), colScanTotals);
+        colScanTotalsCaptions = new HashMap<>();
+        scanRowAndColumnAggregations(table.getRowTotalsLists(), rowScanTotals, rowScanTotalsCaptions, table.getColTotalsLists(), colScanTotals, colScanTotalsCaptions);
     }
 
     private void initCellStyles() {
@@ -553,42 +557,48 @@ public class ExcelWorksheetBuilder {
                 registerColumnWidth(column, value);
 
                 //Set column sub totalstotals
-                column = setColTotalAggregationCell(colScanTotals, sheetRow, x, column, true, x == 0);
+                column = setColTotalAggregationCell(colScanTotals, colScanTotalsCaptions, sheetRow, x, column, true, x == 0);
 
                 //Set column grand totals
                 if (y == rowsetBody[x].length - 1) {
-                    setColTotalAggregationCell(colScanTotals, sheetRow, x, column - 1, true, x == 0);
+                    setColTotalAggregationCell(colScanTotals, colScanTotalsCaptions, sheetRow, x, column - 1, true, x == 0);
                 }
             }
 
             // Set row sub totals
-            startingRow = setRowTotalAggregationCell(rowScanTotals, startingRow, x, true);
+            startingRow = setRowTotalAggregationCell(rowScanTotals, rowScanTotalsCaptions, startingRow, x, true);
             rowCount = startingRow + x;
         }
 
         //Set row grand totals
-        setRowTotalAggregationCell(rowScanTotals, rowCount, 0, true);
+        setRowTotalAggregationCell(rowScanTotals, rowScanTotalsCaptions, rowCount, 0, true);
 
         //Add merge cells
         addMergedRegions(mergeRowsByColumn);
     }
 
-    private void scanRowAndColumnAggregations(List<TotalNode>[] rowTotalsLists, Map<Integer, TotalAggregator[][]> rowScanTotals, List<TotalNode>[] colTotalsLists, Map<Integer, TotalAggregator[][]> colScanTotals) {
+    private void scanRowAndColumnAggregations(List<TotalNode>[] rowTotalsLists,
+                                              Map<Integer, TotalAggregator[][]> rowScanTotals,
+                                              Map<Integer, String[]> aRowScanTotalsCaptions,
+                                              List<TotalNode>[] colTotalsLists,
+                                              Map<Integer, TotalAggregator[][]> colScanTotals,
+                                              Map<Integer, String[]> aColScanTotalsCaptions) {
         if (rowTotalsLists != null) {
             for (List<TotalNode> totalNodes : rowTotalsLists) {
                 //Scan row totals
-                scanAggregations(true, totalNodes, rowScanTotals);
+                scanAggregations(true, totalNodes, rowScanTotals, aRowScanTotalsCaptions);
             }
         }
         if (colTotalsLists != null) {
             for (List<TotalNode> totalNodes : colTotalsLists) {
                 //Scan Columns grand totals
-                scanAggregations(false, totalNodes, colScanTotals);
+                scanAggregations(false, totalNodes, colScanTotals, aColScanTotalsCaptions);
             }
         }
     }
 
-    private void scanAggregations(boolean row, List<TotalNode> totalNodes, Map<Integer, TotalAggregator[][]> scanSums) {
+    private void scanAggregations(boolean row, List<TotalNode> totalNodes, Map<Integer, TotalAggregator[][]> scanSums,
+                                  Map<Integer, String[]> aTotalsCaptions) {
         if (totalNodes != null && (!totalNodes.isEmpty())) {
             int index;
             if (row) {
@@ -606,6 +616,7 @@ public class ExcelWorksheetBuilder {
                     }
                     index++;
                     scanSums.put(index, tg);
+                    aTotalsCaptions.put(index, n.getMemberCaptions());
                 }
             }
         }
@@ -616,56 +627,66 @@ public class ExcelWorksheetBuilder {
             return false;
         }
 
-        for (TotalAggregator ta : aTa[0]) {
-            if (!(ta instanceof BlankAggregator)) {
-                 return true;
+        for (TotalAggregator[] ta : aTa) {
+            for (TotalAggregator t : ta) {
+                if (!(t instanceof BlankAggregator)) {
+                    return true;
+                }
             }
         }
 
         return false;
     }
 
-    private int setRowTotalAggregationCell(Map<Integer, TotalAggregator[][]> scanTotals, int startIndex, int subIndex, boolean grandTotal) {
+    private int setRowTotalAggregationCell(Map<Integer, TotalAggregator[][]> scanTotals,
+                                           Map<Integer, String[]> aScanTotalsCaptions,
+                                           int startIndex, int subIndex, boolean grandTotal) {
         if (!scanTotals.isEmpty()) {
             int row = subIndex + startIndex;
             TotalAggregator[][] aggregatorsTable = scanTotals.get(row);
+            String[] totalCaptions = aScanTotalsCaptions.get(row);
             if (aggregatorsTable != null) {
-                //Create totals row
-                Row sheetRow = workbookSheet.createRow(row + 1);
-                sheetRow.setHeight((short)-1);
-
-                //Detect column start index
-                int startColumnIndex = detectColumnStartIndex();
-
-                if (grandTotal) {
-                    setGrandTotalLabel(sheetRow, startColumnIndex, false);
-                }
-
+                int aggIndex = 0;
                 for (TotalAggregator[] aggregators : aggregatorsTable) {
+                    //Create totals row
+                    Row sheetRow = workbookSheet.createRow(row + 1);
+                    sheetRow.setHeight((short)-1);
+
+                    //Detect column start index
+                    int startColumnIndex = detectColumnStartIndex();
+
+                    if (grandTotal) {
+                        setGrandTotalLabel(sheetRow, startColumnIndex, totalCaptions == null ? null : totalCaptions[aggIndex], false);
+                    }
 
                     int column = startColumnIndex;
 
                     for (TotalAggregator aggregator : aggregators) {
 
                         //Calculate column sub total index
-                        column = setColTotalAggregationCell(colScanTotals, null, -1, column, false, false);
+                        column = setColTotalAggregationCell(colScanTotals, colScanTotalsCaptions, sheetRow, -1, column, false, false);
 
                         //Create row totals cell
                         Cell cell = sheetRow.createCell(column);
                         Double value = aggregator.getValue();
-                        cell.setCellValue(value);
+                        if (value != null) {
+                            cell.setCellValue(value);
+                        }
 
                         String formatString = aggregator.getFormat().getFormatString();
                         CellStyle totalCSClone = excelWorkbook.createCellStyle();
                         totalCSClone.cloneStyleFrom(totalsCS);
                         setDataFormat(totalCSClone, formatString);
                         cell.setCellStyle(totalCSClone);
-                        if (SaikuProperties.webExportExcelHighlightNegativeNumbers && value < 0) {
+                        if (SaikuProperties.webExportExcelHighlightNegativeNumbers && value != null && value < 0) {
                             totalCSClone.setFont(highLightTotalsFont);
                         }
 
                         registerColumnWidth(column-1, String.valueOf(value));
                     }
+
+                    aggIndex++;
+                    row++;
                 }
                 startIndex++;
             }
@@ -689,34 +710,41 @@ public class ExcelWorksheetBuilder {
         return index;
     }
 
-    private int setColTotalAggregationCell(Map<Integer, TotalAggregator[][]> scanTotals, Row sheetRow, int x, int column, boolean setValue, boolean grandTotal) {
+    private int setColTotalAggregationCell(Map<Integer, TotalAggregator[][]> scanTotals,
+                                           Map<Integer, String[]> aScanTotalsCaptions,
+                                           Row sheetRow, int x, int column, boolean setValue, boolean grandTotal) {
         column++;
 
         if (!scanTotals.isEmpty()) {
             TotalAggregator[][] aggregatorsTable = scanTotals.get(column);
+            String[] totalCaptions = aScanTotalsCaptions.get(column);
 
             if (aggregatorsTable != null) {
                 if (setValue) {
-                    if (grandTotal) {
-                        setGrandTotalLabel(sheetRow.getRowNum() - 1, column, true);
-                    }
-
+                    int aggIndex = 0;
                     for (TotalAggregator[] aggregators : aggregatorsTable) {
+                        if (grandTotal) {
+                            setGrandTotalLabel(sheetRow.getRowNum() - 1, column, totalCaptions == null ? null : totalCaptions[aggIndex], true);
+                        }
+
                         Cell cell = sheetRow.createCell(column);
                         Double value = aggregators[x].getValue();
-                        cell.setCellValue(value);
+                        if (value != null) {
+                            cell.setCellValue(value);
+                        }
 
                         String formatString = aggregators[x].getFormat().getFormatString();
                         CellStyle totalCSClone = excelWorkbook.createCellStyle();
                         totalCSClone.cloneStyleFrom(totalsCS);
                         setDataFormat(totalCSClone, formatString);
-                        if (SaikuProperties.webExportExcelHighlightNegativeNumbers && value < 0) {
+                        if (SaikuProperties.webExportExcelHighlightNegativeNumbers && value != null && value < 0) {
                             totalCSClone.setFont(highLightTotalsFont);
                         }
                         cell.setCellStyle(totalCSClone);
 
                         registerColumnWidth(column, String.valueOf(value));
                         column++;
+                        aggIndex++;
                     }
                 }
             }
@@ -735,17 +763,17 @@ public class ExcelWorksheetBuilder {
         }
     }
 
-    private void setGrandTotalLabel(int x, int y, boolean header) {
+    private void setGrandTotalLabel(int x, int y, String aTotalCaption, boolean header) {
         Row sheetRow = workbookSheet.getRow(x);
         if (sheetRow != null) {
-            setGrandTotalLabel(sheetRow, y, header);
+            setGrandTotalLabel(sheetRow, y, aTotalCaption, header);
         }
     }
 
-    private void setGrandTotalLabel(Row sheetRow, int y, boolean header) {
+    private void setGrandTotalLabel(Row sheetRow, int y, String aTotalCaption, boolean header) {
         Cell cell = sheetRow.createCell(y);
         //TODO i18n переделать под properties файл
-        String value = "Общий итог";
+        String value = (StringUtils.isNotBlank(aTotalCaption) ? aTotalCaption + " " : "") + "Общий итог";
         if (header) {
             fillHeaderCell(sheetRow, value, y);
         } else {
@@ -940,7 +968,7 @@ public class ExcelWorksheetBuilder {
                 }
 
                 //Set sub total column space
-                int nextColumn = setColTotalAggregationCell(colScanTotals, sheetRow, x, column, false, false);
+                int nextColumn = setColTotalAggregationCell(colScanTotals, colScanTotalsCaptions, sheetRow, x, column, false, false);
                 if (column != nextColumn - 1) {
                     startSameFromPos++;
                 }
