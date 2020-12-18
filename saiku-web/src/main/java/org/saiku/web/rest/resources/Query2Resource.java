@@ -35,6 +35,8 @@ import org.saiku.web.export.JSConverter;
 import org.saiku.web.export.PdfReport;
 import org.saiku.web.rest.objects.resultset.QueryResult;
 import org.saiku.web.rest.util.RestUtil;
+import org.saiku.web.util.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import javax.mail.internet.MimeUtility;
@@ -57,6 +59,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -333,12 +336,18 @@ public class Query2Resource {
             if(name == null || name.equals("")) {
               fileName = SaikuProperties.webExportExcelName + "." + SaikuProperties.webExportExcelFormat;
             } else {
-              fileName = MimeUtility.encodeText(name, "UTF-8", null);
+              fileName = name;
             }
-            return Response.ok(doc, MediaType.APPLICATION_OCTET_STREAM).header(
-                    "content-disposition",
-                    "attachment; filename = " + fileName).header(
-                    "content-length",doc.length).build();
+
+            ContentDisposition disposition = ContentDisposition
+                    .builder("attachment")
+                    .filename(fileName, StandardCharsets.UTF_8)
+                    .build();
+
+            return Response.ok(doc, MediaType.APPLICATION_OCTET_STREAM)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                    .header("content-length", doc.length)
+                    .build();
         }
         catch (Exception e) {
             log.error("Cannot get excel for query (" + queryName + ")",e);
@@ -657,12 +666,18 @@ public class Query2Resource {
             if(name==null || name.equals("")){
               fileName = "export.pdf";
             } else {
-              fileName = MimeUtility.encodeText(name + ".pdf", "UTF-8", null);
+              fileName = name + ".pdf";
             }
-            return Response.ok(doc).type("application/pdf").header(
-                    "content-disposition",
-                    "attachment; filename = "+fileName).header(
-                    "content-length",doc.length).build();
+
+            ContentDisposition disposition = ContentDisposition
+                    .builder("attachment")
+                    .filename(fileName, StandardCharsets.UTF_8)
+                    .build();
+
+            return Response.ok(doc).type("application/pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                    .header("content-length", doc.length)
+                    .build();
         } catch (Exception e) {
             log.error("Error exporting query to  PDF", e);
             return Response.serverError().entity(e.getMessage()).status(Status.INTERNAL_SERVER_ERROR).build();
